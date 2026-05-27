@@ -3,656 +3,766 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Real Estate Tourism, Land Use & Health on Barbados's West Coast</title>
-  <meta name="description" content="An interactive look at how real estate tourism, land-use change, loss of public space, and health outcomes are connected on the West Coast of Barbados. Field observation, GIS, remote sensing, and health data." />
+  <title>Barbados Dual Map Viewer</title>
+  <meta name="description" content="Embeddable side-by-side comparator: satellite analysis (GEE outputs, 1984 to 2025 time scrubber) and Barbados Physical Development Plan maps. Linked pan and zoom." />
 
-  <link rel="preconnect" href="https://cdn.jsdelivr.net" />
+  <!-- Leaflet from CDN -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" />
-  <link rel="stylesheet" href="css/style.css" />
+
+  <style>
+    /* ---- BASE ---- */
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; height: 100%; background: #f7f5ef; font-family: "Inter", "Helvetica Neue", Arial, system-ui, sans-serif; color: #15242b; }
+
+    .embed-card {
+      display: flex;
+      gap: 8px;
+      width: 100%;
+      height: 100vh;
+      padding: 8px;
+    }
+    .map-pane {
+      position: relative;
+      flex: 1 1 50%;
+      min-width: 0;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 18px rgba(9,36,43,0.12);
+      background: #cfe3e4;
+    }
+    .map-pane > div[id^="map"] { position: absolute; inset: 0; }
+
+    .map-pane__header {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      z-index: 600;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+      padding: 0.45rem 0.7rem 0.45rem 64px;
+      background: linear-gradient(180deg, rgba(15,36,43,0.85) 0%, rgba(15,36,43,0) 100%);
+      color: #fff;
+      pointer-events: none;
+    }
+    .map-pane__label {
+      font-size: 0.78rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+    .map-pane__sync {
+      font-size: 0.66rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      background: rgba(210,52,47,0.85);
+      padding: 0.15rem 0.55rem;
+      border-radius: 12px;
+      font-weight: 700;
+    }
+
+    /* ---- LEGEND ---- */
+    .legend {
+      max-width: 260px;
+      font-size: 0.78rem;
+      line-height: 1.45;
+      background: rgba(255,255,255,0.97);
+      padding: 0.7rem 0.85rem;
+      border: 1px solid #d6cdb7;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.14);
+    }
+    .legend h4 { margin: 0 0 .4rem; font-size: 0.88rem; color: #2b2820; }
+    .legend i {
+      display: inline-block; width: 14px; height: 14px;
+      margin-right: 6px; vertical-align: middle;
+      border: 1px solid rgba(0,0,0,0.18);
+    }
+
+    /* ---- RASTER PICKER ---- */
+    .raster-picker {
+      position: relative;
+      background: #ffffff;
+      border: 1px solid #e3dccd;
+      border-radius: 8px;
+      padding: 0.65rem 0.75rem 0.7rem;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+      width: 260px;
+    }
+    .raster-picker__label {
+      display: block;
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #5b5749;
+      margin: 0 1.6rem 0.35rem 0;
+    }
+    .raster-picker__select {
+      display: block;
+      width: 100%;
+      font-size: 0.85rem;
+      padding: 5px 8px;
+      border: 1px solid #d6cdb7;
+      border-radius: 5px;
+      background: #fff;
+      cursor: pointer;
+      color: #2b2820;
+    }
+    .raster-picker__clear {
+      position: absolute;
+      top: 4px; right: 6px;
+      background: transparent;
+      border: none;
+      width: 22px; height: 22px;
+      font-size: 18px;
+      line-height: 1;
+      cursor: pointer;
+      color: #8a8170;
+      border-radius: 4px;
+    }
+    .raster-picker__clear:hover { background: #fdebe8; color: #a51d0e; }
+
+    /* ---- PLANNING PANEL ---- */
+    .plan-panel {
+      background: #ffffff;
+      border: 1px solid #e3dccd;
+      border-radius: 8px;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+      width: 270px;
+      max-height: calc(100% - 80px);
+      display: flex;
+      flex-direction: column;
+    }
+    .plan-panel__head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.55rem 0.75rem;
+      border-bottom: 1px solid #ede0c1;
+      font-size: 0.85rem;
+      color: #2b2820;
+    }
+    .plan-panel__collapse {
+      background: transparent;
+      border: 1px solid #d6cdb7;
+      border-radius: 4px;
+      width: 22px; height: 22px;
+      font-size: 14px;
+      line-height: 1;
+      cursor: pointer;
+      color: #5b5749;
+    }
+    .plan-panel__collapse:hover { background: #faf6ec; }
+    .plan-panel__hint {
+      margin: 0;
+      padding: 0.45rem 0.75rem 0.55rem;
+      font-size: 0.72rem;
+      color: #6a6354;
+      border-bottom: 1px solid #ede0c1;
+    }
+    .plan-panel__body {
+      overflow-y: auto;
+      padding: 0.3rem 0.55rem 0.55rem;
+    }
+    .plan-panel__row {
+      padding: 0.3rem 0;
+      border-bottom: 1px solid #f0e8d5;
+    }
+    .plan-panel__row:last-child { border-bottom: none; }
+    .plan-panel__check {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.45rem;
+      cursor: pointer;
+      font-size: 0.79rem;
+      line-height: 1.35;
+      color: #2b2820;
+    }
+    .plan-panel__check input { margin-top: 3px; flex-shrink: 0; }
+    .plan-panel__controls {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.35rem 0 0.1rem 1.4rem;
+      font-size: 0.72rem;
+      color: #6a6354;
+      flex-wrap: wrap;
+    }
+    .plan-panel__controls input[type=range] {
+      flex: 1 1 80px;
+      min-width: 70px;
+      accent-color: #d2342f;
+    }
+    .plan-panel__opacity-val {
+      font-variant-numeric: tabular-nums;
+      min-width: 30px;
+      text-align: right;
+    }
+    .plan-panel__view, .plan-panel__legend-btn {
+      color: #2b6b8a;
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .plan-panel__legend { margin: 0.45rem 0 0.15rem 1.4rem; }
+    .plan-panel__legend img {
+      width: 100%;
+      border: 1px solid #d6cdb7;
+      border-radius: 4px;
+      display: block;
+    }
+
+    /* Collapsed states */
+    .plan-panel.is-collapsed {
+      width: auto; min-width: 0;
+      border-radius: 999px;
+      max-height: none;
+    }
+    .plan-panel.is-collapsed .plan-panel__head {
+      border-bottom: none;
+      border-radius: 999px;
+      padding: 0.4rem 0.7rem;
+    }
+    .plan-panel.is-collapsed .plan-panel__hint,
+    .plan-panel.is-collapsed .plan-panel__body { display: none !important; }
+
+    /* ---- TIME SCRUBBER ---- */
+    .time-scrubber {
+      background: #ffffff;
+      border: 1px solid #e3dccd;
+      border-radius: 8px;
+      padding: 0.6rem 0.85rem 0.7rem;
+      width: 460px;
+      max-width: 90vw;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+    }
+    .time-scrubber__head {
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+      margin-bottom: 0.45rem;
+    }
+    .time-scrubber__title {
+      flex: 1 1 auto;
+      font-size: 0.85rem;
+      color: #2b2820;
+      font-weight: 700;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .time-scrubber__play {
+      background: #d2342f;
+      color: #fff;
+      border: none;
+      border-radius: 50%;
+      width: 26px; height: 26px;
+      font-size: 11px;
+      cursor: pointer;
+    }
+    .time-scrubber__play:hover { background: #a51d0e; }
+    .time-scrubber__collapse {
+      background: transparent;
+      border: 1px solid #e3dccd;
+      border-radius: 4px;
+      width: 24px; height: 24px;
+      font-size: 14px;
+      cursor: pointer;
+      color: #5b5749;
+    }
+    .time-scrubber__ticks {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.7rem;
+      color: #6a6354;
+      margin-bottom: 0.2rem;
+      padding: 0 0.2rem;
+    }
+    .time-scrubber__tick {
+      cursor: pointer;
+      padding: 2px 4px;
+      border-radius: 4px;
+      white-space: nowrap;
+    }
+    .time-scrubber__tick:hover { background: #f3eee2; }
+    .time-scrubber__tick.is-active { background: #d2342f; color: #fff; font-weight: 600; }
+    .time-scrubber__slider { width: 100%; accent-color: #d2342f; }
+    .time-scrubber.is-collapsed { width: auto; padding: 0.35rem 0.55rem; border-radius: 999px; }
+    .time-scrubber.is-collapsed .time-scrubber__head { margin-bottom: 0; gap: 0.4rem; }
+    .time-scrubber.is-collapsed .time-scrubber__title { font-size: 0.72rem; max-width: 130px; }
+    .time-scrubber__body { display: block; }
+    .time-scrubber.is-collapsed .time-scrubber__body { display: none; }
+
+    /* ---- LIGHTBOX ---- */
+    .lightbox {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 12, 8, 0.92);
+      z-index: 10000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 3vh 3vw;
+      cursor: zoom-out;
+    }
+    .lightbox.is-open { display: flex; }
+    .lightbox__figure {
+      max-width: 95vw; max-height: 92vh;
+      margin: 0;
+      background: #fff;
+      border-radius: 6px;
+      overflow: hidden;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+      display: flex;
+      flex-direction: column;
+    }
+    .lightbox__img {
+      max-width: 100%; max-height: 80vh;
+      display: block; margin: auto;
+    }
+    .lightbox__cap {
+      padding: 0.7rem 1rem;
+      background: #2b2820;
+      color: #f3eee2;
+      font-size: 0.88rem;
+      text-align: center;
+    }
+    .lightbox__close {
+      position: absolute;
+      top: 14px; right: 18px;
+      background: transparent;
+      border: none;
+      color: #f3eee2;
+      font-size: 36px;
+      cursor: pointer;
+      z-index: 10001;
+    }
+
+    .v8-raster { image-rendering: pixelated; }
+    .plan-map-overlay { image-rendering: auto; }
+
+    @media (max-width: 900px) {
+      .embed-card { flex-direction: column; }
+      .map-pane { flex: 0 0 50%; }
+      .time-scrubber { width: 88vw; }
+    }
+  </style>
 </head>
 <body>
 
-  <!-- ============ HERO ============ -->
-  <header class="hero">
-    <div class="hero__inner">
-      <p class="eyebrow">Barbados &middot; West Coast &middot; A Spatial Snapshot</p>
-      <h1>Selling Paradise, Spending Health</h1>
-      <p class="lede">
-        On Barbados's Platinum Coast, real estate tourism is reshaping the land. Plantations and open
-        ground are being turned into gated villas and golf greens. This is a story about how that
-        transformation is connected to land use change, to the loss of public and green space, and to
-        the island's rising burden of cardiovascular disease.
-      </p>
-      <p class="byline">
-        A research project by <strong>Sophia Chen</strong> and <strong>Anastasia Ejov</strong><br />
-        Integrating field observation, GIS, remote sensing, and health-outcomes data.
-      </p>
-      <p class="hero-links" style="margin-top:1.25rem;">
-        <a href="methods.html" style="display:inline-block;padding:0.55rem 1rem;border:1.5px solid currentColor;border-radius:999px;text-decoration:none;font-weight:600;font-size:0.95rem;">
-          Methods &amp; code &rarr;
-        </a>
-        <a href="https://github.com/sophiachen-geo/barbados" style="display:inline-block;margin-left:0.5rem;padding:0.55rem 1rem;border:1.5px solid currentColor;border-radius:999px;text-decoration:none;font-weight:600;font-size:0.95rem;">
-          View on GitHub
-        </a>
-      </p>
+<div class="embed-card">
+  <div class="map-pane map-pane--left">
+    <div class="map-pane__header">
+      <span class="map-pane__label">Satellite Analysis</span>
     </div>
-    <div class="scroll-cue">Scroll to explore<span>&#8595;</span></div>
-  </header>
-
-  <!-- ============ KEY-STAT STRIP ============ -->
-  <section class="stat-strip" aria-label="Headline figures">
-    <div class="stat"><div class="num">+55%</div><div class="lab">Heart Attack Cases, 2013 to 2020</div></div>
-    <div class="stat"><div class="num">+81.3%</div><div class="lab">Price Premium for a Gated Property</div></div>
-    <div class="stat"><div class="num">+117.9%</div><div class="lab">Unoccupied Properties, 1990 to 2010</div></div>
-    <div class="stat"><div class="num">83%</div><div class="lab">Share of All Deaths That Are Non Communicable</div></div>
-  </section>
-
-  <!-- ============ INTRO BAND ============ -->
-  <div class="band">
-    <p class="kicker">The question</p>
-    <h2>Can the West Coast's real estate market coexist with sustainable, healthy communities?</h2>
-    <p>
-      Barbados is a Small Island Developing State whose sugar economy has, over fifty years, given way
-      to resorts, villas and golf courses. This is the leisuring of rural landscapes, the conversion
-      of land from productive to consumptive use. The project pairs a statistical analysis of luxury
-      property listings and a week of field observation with open GIS layers, satellite imagery, and
-      national health data to trace a single thread: <strong>how the supply side of real estate
-      tourism reaches all the way into public space and public health.</strong>
-    </p>
-    <p>
-      The panel on the next screens stays fixed while the story scrolls beside it. Maps pan, zoom and
-      change layers; charts appear where the evidence is in the numbers.
-    </p>
+    <div id="map"></div>
   </div>
-
-  <!-- ============ SCROLLYTELLING ============ -->
-  <section id="scrolly">
-    <!-- STICKY GRAPHIC: two side-by-side map viewers -->
-    <div class="scrolly__graphic">
-      <div class="graphic-card graphic-card--split">
-
-        <!-- LEFT PANE: satellite analysis + scrollytelling map -->
-        <div class="map-pane map-pane--left">
-          <div class="map-pane__header">
-            <span class="map-pane__label">Satellite Analysis</span>
-            <span class="graphic-badge" id="graphic-badge">Map &middot; Barbados</span>
-          </div>
-          <div id="map"></div>
-        </div>
-
-        <!-- RIGHT PANE: government planning maps comparator -->
-        <div class="map-pane map-pane--right">
-          <div class="map-pane__header">
-            <span class="map-pane__label">Government Planning Maps</span>
-            <span class="map-pane__sync" id="sync-badge" title="Pan and zoom stay linked between both maps">Linked View</span>
-          </div>
-          <div id="map-plan"></div>
-        </div>
-
-      </div>
+  <div class="map-pane map-pane--right">
+    <div class="map-pane__header">
+      <span class="map-pane__label">Government Planning Maps</span>
+      <span class="map-pane__sync">Linked View</span>
     </div>
-
-    <!-- SCROLLING STEPS -->
-    <div class="scrolly__steps">
-
-      <div class="step" data-graphic="map" data-view="overview">
-        <div class="step__card">
-          <span class="num-tag">01 &middot; The island</span>
-          <h3>A dense, fragile island economy</h3>
-          <p>
-            Barbados packs a dense population onto 11 parishes with limited resources and revenues that
-            depend on imported goods and foreign visitors. Historic inequities left poor housing and an
-            insecure land-tenure system, producing a <strong>highly uneven distribution of settlement</strong>
-            that still shapes the island today.
-          </p>
-          <p>The eleven parishes shown here are the spatial units that anchor every layer in this analysis.</p>
-        </div>
-      </div>
-
-      <div class="step" data-graphic="map" data-view="westcoast">
-        <div class="step__card">
-          <span class="num-tag">02 &middot; The Platinum Coast</span>
-          <h3>Where Global Capital Meets the Shoreline</h3>
-          <p>
-            The West Coast, comprising Saint James and Saint Peter, is one of the most sought after
-            real estate tourism locations in the Caribbean. Plantations have become resorts, villas
-            and golf courses, all of them serving and exploiting a growing affluent class.
-          </p>
-          <p class="pull">
-            The 2020 Welcome Stamp lets non nationals earning over fifty thousand US dollars reside
-            in Barbados tax free. It is the newest of many incentives drawing residential tourism to
-            this coast.
-          </p>
-          <figure class="step-image">Add image here: a wide shot of the Platinum Coast looking south from a hillside</figure>
-        </div>
-      </div>
-
-      <div class="step" data-graphic="chart" data-view="regression">
-        <div class="step__card">
-          <span class="num-tag">03 &middot; What the Listings Say</span>
-          <h3>Pricing Privacy and Enclosure</h3>
-          <p>
-            A Python scraper pulled <strong>135 listings</strong> from a local luxury portal. A
-            multiple regression model then isolated what drives price. The strongest signals are
-            not about the house at all. They are about <strong>enclosure and exclusivity</strong>.
-          </p>
-          <p>
-            Being inside a gated property adds <strong>81 percent</strong> to the price. Each extra
-            room adds another 25.5 percent. Penthouses and condominiums command large premiums of
-            their own. The market literally pays for separation from the surrounding community.
-          </p>
-          <div class="step__chart-slot"></div>
-        </div>
-      </div>
-
-      <div class="step" data-graphic="map" data-view="landuse">
-        <div class="step__card">
-          <span class="num-tag">04 &middot; The Leisuring of the Land</span>
-          <h3>From Productive Ground to Consumptive Amenity</h3>
-          <p>
-            Switch to satellite imagery and the West Coast corridor reads as near continuous built
-            development hugging the shore. Agricultural land, in a country self sufficient only in
-            chicken, has been converted to golf and polo. New projects climb
-            <strong>higher and higher uphill</strong> on steep, erosion prone slopes.
-          </p>
-          <p>
-            The classified Landsat layers later in this story show exactly where that expansion
-            concentrates. The highlighted corridor here is a hand drawn placeholder against the
-            satellite basemap.
-          </p>
-          <figure class="step-image">Add image here: a photograph or sketch of a hilltop villa development on the West Coast</figure>
-        </div>
-      </div>
-
-      <div class="step" data-graphic="map" data-view="publicspace">
-        <div class="step__card">
-          <span class="num-tag">05 &middot; The Loss of Public Space</span>
-          <h3>Gates, Vacancy, and Unequal Water</h3>
-          <p>
-            Field visits mapped the texture of enclosure. Some hotels could be walked into freely.
-            Others next door were camera guarded with manager only access. Foreign owned homes sit
-            <strong>vacant for months or years</strong> even as locals live in overcrowded
-            households.
-          </p>
-          <p>
-            Resource distribution tilts toward the coast. Hotels and tourist residences use
-            <strong>three times more water</strong> than locals, forty percent of treated water
-            never reaches customers, and raw sewage was observed on the East Coast but never on the
-            West. Click the markers on the map to read each field encounter in full.
-          </p>
-          <figure class="step-image">Add image here: one of the field photographs from the March observation log</figure>
-        </div>
-      </div>
-
-      <div class="step" data-graphic="chart" data-view="activity">
-        <div class="step__card">
-          <span class="num-tag">06 &middot; The Obesogenic Environment</span>
-          <h3>Built to Drive, Not to Move</h3>
-          <p>
-            The same land use pattern that produces sprawl, car dependence, and shrinking communal
-            green space is what public health researchers call an <em>obesogenic environment</em>.
-            The behavioural data are stark. Only <strong>29 percent of thirteen to fifteen year
-            olds</strong> are active for an hour on five or more days a week, while
-            <strong>65 percent are sedentary</strong> for three hours or more each day.
-          </p>
-          <p>Navigating Barbados without a car is hard. Physical immobility becomes social immobility.</p>
-          <div class="step__chart-slot"></div>
-        </div>
-      </div>
-
-      <div class="step" data-graphic="chart" data-view="cvd">
-        <div class="step__card">
-          <span class="num-tag">07 &middot; The Health Signal</span>
-          <h3>Heart Attacks Are Rising. Strokes Are Flat.</h3>
-          <p>
-            National registry data tell a sharp story. Between 2013 and 2020,
-            <strong>acute heart attack incidence rose about 55 percent</strong>. The window
-            coincides with the most recent wave of tourism driven development. Stroke incidence
-            over the same period stayed essentially flat.
-          </p>
-          <p>That divergence is the empirical hook tying the built environment to cardiovascular outcomes.</p>
-          <div class="step__chart-slot"></div>
-        </div>
-      </div>
-
-      <div class="step" data-graphic="chart" data-view="riskfactors">
-        <div class="step__card">
-          <span class="num-tag">08 &middot; The Mechanism</span>
-          <h3>Hypertension, Diabetes, Obesity</h3>
-          <p>
-            The pathway runs through well documented risk factors. Among hospitalised heart attack
-            patients, <strong>86 percent had hypertension and 86 percent were obese</strong>. Eight
-            in ten men and nine in ten women carry at least one chronic disease risk factor, and
-            two of every three adults are overweight or obese.
-          </p>
-          <p>
-            Non communicable diseases now account for <strong>83 percent of all deaths</strong> and
-            consume <strong>70 percent of the national hospital budget</strong>. That is the public
-            cost of a privatised landscape.
-          </p>
-          <div class="step__chart-slot"></div>
-        </div>
-      </div>
-
-      <div class="step" data-graphic="map" data-view="edjoin">
-        <div class="step__card">
-          <span class="num-tag">09 &middot; The Spatial Overlap</span>
-          <h3>Bringing Disease Down to the Neighbourhood</h3>
-          <p>
-            The 2010 census records self reported heart disease, hypertension and diabetes for
-            roughly <strong>six hundred enumeration districts</strong>, alongside dwelling vintage
-            cohorts and unoccupied dwelling counts. The latter form a built in
-            <em>tourism pressure index</em>.
-          </p>
-          <p>
-            Joined to the parish polygons shown here, and eventually to the finer enumeration
-            district shapefile, the census lets us test whether the parishes losing the most open
-            land also carry the heaviest chronic disease burden. The choropleth here is
-            illustrative until that finer layer lands.
-          </p>
-        </div>
-      </div>
-
-      <div class="step" data-graphic="map" data-view="fieldtimeline">
-        <div class="step__card">
-          <span class="num-tag">10 &middot; The field record</span>
-          <h3>One week, a dozen encounters</h3>
-          <p>
-            Every point on this map is a logged observation from March 1&ndash;7: a church that welcomes
-            locals and tourists alike, a farmer selling eggs across from a five-star hotel, gated estates
-            selling &ldquo;the ideal Caribbean home experience,&rdquo; a new hillside project branded &ldquo;green&rdquo; to lift
-            its price.
-          </p>
-          <p>Explore them &mdash; each marker carries the raw note and the issues it speaks to.</p>
-        </div>
-      </div>
-
-      <!-- ============ RASTER WALKTHROUGH ============ -->
-
-      <div class="step" data-graphic="map" data-view="raster_class_1984_92">
-        <div class="step__card">
-          <span class="num-tag">11 &middot; The Baseline, 1984 to 1992</span>
-          <h3>The Landscape Before the Boom</h3>
-          <p>
-            In the earliest Landsat record, sugarcane still covers the central plain. Natural
-            vegetation holds the steep eastern slopes and the rolling north. Built area sits almost
-            entirely within Bridgetown and a handful of small coastal villages. This is the pre
-            leisuring landscape against which every later epoch is measured.
-          </p>
-          <figure class="step-image">Add image here: a historical photograph of sugarcane or rural Saint Andrew, 1980s</figure>
-        </div>
-      </div>
-
-      <div class="step" data-graphic="map" data-view="raster_class_2002_10">
-        <div class="step__card">
-          <span class="num-tag">12 &middot; The Mid Period, 2002 to 2010</span>
-          <h3>The Tourism Real Estate Boom Registers in the Pixels</h3>
-          <p>
-            By the turn of the millennium, gated villa enclaves and resort fairways have begun to
-            replace cropland along the western coast. Compare this layer to the baseline and the
-            shift is unmistakable on the Platinum Coast strip running north from Holetown. The
-            manicured vegetation signature also begins to spread inland.
-          </p>
-          <figure class="step-image">Add image here: a recent photograph of a Platinum Coast villa development or golf fairway</figure>
-        </div>
-      </div>
-
-      <div class="step" data-graphic="map" data-view="raster_class_2019_25">
-        <div class="step__card">
-          <span class="num-tag">13 &middot; The Welcome Stamp Era, 2019 to 2025</span>
-          <h3>The Current Map, and a Serious Caveat</h3>
-          <p>
-            This is the most recent classification in the Landsat record. Cross validation flagged
-            that the thirty metre Landsat classifier achieves only
-            <strong>18.6&#37; accuracy in Saint James</strong>, with a kappa of 0.03. That is the
-            single most important parish for this project. The next step therefore offers a finer
-            resolution sanity check built from Sentinel 2.
-          </p>
-          <p><a href="methods.html" style="color:#a51d0e;font-weight:600;">Read the parish cross validation table on the methods page.</a></p>
-        </div>
-      </div>
-
-      <div class="step" data-graphic="map" data-view="raster_class_10m_v8f">
-        <div class="step__card">
-          <span class="num-tag">14 &middot; Cross Check at Ten Metres</span>
-          <h3>A Finer Resolution Sanity Check</h3>
-          <p>
-            The same five class scheme, this time built from ten metre Sentinel 2 imagery. The
-            increased resolution makes individual hotel footprints, road widths, and villa lot
-            boundaries visible to the classifier. The two products should broadly agree where the
-            Landsat classifier is reliable, and diverge informatively where it is not.
-          </p>
-          <figure class="step-image">Add image here: a satellite close up of a West Coast resort property</figure>
-        </div>
-      </div>
-
-      <div class="step" data-graphic="map" data-view="raster_became_urban">
-        <div class="step__card">
-          <span class="num-tag">15 &middot; What Became Urban</span>
-          <h3>The Single Most Direct Conversion Map</h3>
-          <p>
-            Red pixels were anything other than built in the 1984 epoch and are built today. The
-            pattern traces a coastal arc that is dense along the western shore, lighter along the
-            south, and almost absent on the wilder east. Of all the layers in this stack, this is
-            the one that speaks most directly to real estate driven urbanisation.
-          </p>
-        </div>
-      </div>
-
-      <div class="step" data-graphic="map" data-view="raster_sugarcane_conv">
-        <div class="step__card">
-          <span class="num-tag">16 &middot; Where the Sugar Went</span>
-          <h3>The Geography of Plantation Decline</h3>
-          <p>
-            Barbados had over thirty thousand hectares under sugarcane at independence. Today the
-            figure is under four thousand. This layer shows what each former sugarcane pixel
-            became. The red Sugarcane to Built class concentrated along the western coast is the
-            spatial signature of plantation land sold for tourism real estate.
-          </p>
-          <figure class="step-image">Add image here: a side by side of a historical plantation field and the same site today</figure>
-        </div>
-      </div>
-
-      <div class="step" data-graphic="map" data-view="raster_manicuring_10m">
-        <div class="step__card">
-          <span class="num-tag">17 &middot; The Golf and Resort Fingerprint</span>
-          <h3>The Manicured Vegetation Index</h3>
-          <p>
-            High values, shown in deep green, identify heavily managed turf. These are golf course
-            fairways, resort lawns, and hotel grounds. The index exploits seasonal phenology: mowed
-            grass has a flat seasonal signal that neither natural vegetation nor sugarcane cropping
-            shows. Sandy Lane, Apes Hill, Royal Westmoreland, and the Sandals fairways all light up
-            clearly.
-          </p>
-          <figure class="step-image">Add image here: a ground level photograph of a golf fairway, ideally one visible on the map</figure>
-        </div>
-      </div>
-
-      <div class="step" data-graphic="map" data-view="raster_ndvi_trend">
-        <div class="step__card">
-          <span class="num-tag">18 &middot; Greening or Browning</span>
-          <h3>The NDVI Trend, 2017 to 2024</h3>
-          <p>
-            Red marks pixels where vegetation cover is decreasing year on year. Green marks the
-            opposite. The western coast and the densifying suburban ring around Bridgetown show
-            consistent browning over the most recent seven years of imagery. This is the most
-            direct loss of green space layer in the entire stack.
-          </p>
-        </div>
-      </div>
-
-      <div class="step" data-graphic="map" data-view="raster_ccdc_firstbreak">
-        <div class="step__card">
-          <span class="num-tag">19 &middot; When the Change Happened</span>
-          <h3>The Year of First Detected Change</h3>
-          <p>
-            Each pixel is coloured by the year a continuous change detection algorithm first
-            registered a real disturbance. Purple indicates a change that happened decades ago,
-            often the 1990s sugar decline. Yellow indicates a change in the past few years, the
-            visual fingerprint of construction during the Welcome Stamp era. The temporal pattern
-            here mirrors the rising incidence of heart attacks over the same window.
-          </p>
-        </div>
-      </div>
-
-      <div class="step" data-graphic="map" data-view="raster_disagreement">
-        <div class="step__card">
-          <span class="num-tag">20 &middot; Where the Classifiers Disagree</span>
-          <h3>A Reliability Map</h3>
-          <p>
-            Five separate classifiers vote on each pixel. This layer shows the count of
-            disagreements. High values mark pixels where the methods do not agree, and any per
-            pixel statistic should be treated with care there. Read this alongside the parish
-            cross validation table on the <a href="methods.html">methods page</a>.
-          </p>
-        </div>
-      </div>
-
-    </div>
-  </section>
-
-  <!-- ============ SYNTHESIS / GROUPED PATHWAY ============ -->
-  <section class="pathway" id="synthesis">
-    <h2>Connecting the Threads</h2>
-    <p class="sub">How real estate tourism reaches from a property listing to a hospital ward.</p>
-
-    <div class="chain chain--grouped">
-
-      <!-- Group 1: the cause -->
-      <div class="group group--cause">
-        <p class="group__label">The Driver</p>
-        <div class="node">
-          <div class="ic">&#127958;</div>
-          <h4>Real Estate Tourism</h4>
-          <p>Foreign capital, gated villas, the Welcome Stamp</p>
-        </div>
-      </div>
-
-      <!-- Group 2: spatial consequences -->
-      <div class="group group--space">
-        <p class="group__label">The Spatial Consequences</p>
-        <div class="group__pair">
-          <div class="node">
-            <div class="ic">&#127966;</div>
-            <h4>Land Use Change</h4>
-            <p>Plantations and farmland become resorts, golf courses, and hillside sprawl</p>
-          </div>
-          <div class="node">
-            <div class="ic">&#128682;</div>
-            <h4>Loss of Public Space</h4>
-            <p>Enclosure, vacancy, unequal water, restricted coastal access</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Group 3: health consequences -->
-      <div class="group group--health">
-        <p class="group__label">The Health Consequences</p>
-        <div class="group__pair">
-          <div class="node">
-            <div class="ic">&#128694;</div>
-            <h4>Obesogenic Environment</h4>
-            <p>Car dependence, low activity, less green and communal space</p>
-          </div>
-          <div class="node">
-            <div class="ic">&#10084;</div>
-            <h4>Rising Cardiovascular Disease</h4>
-            <p>Hypertension and obesity drive a 55 percent rise in heart attacks</p>
-          </div>
-        </div>
-      </div>
-
-    </div>
-
-    <div class="finding">
-      <p class="kicker">The Finding This Project Is Built to Defend</p>
-      <p>
-        As tourism driven development converted West Coast land from open and agricultural ground
-        to built and enclosed estates, it hollowed out the public and active spaces that protect
-        health. The parishes under the most pressure now sit alongside a steeply rising burden of
-        cardiovascular disease.
-      </p>
-      <p class="caveat">
-        Causal but not yet proven. The national cardiovascular trends are temporal, the census
-        disease data are a 2010 cross section, and parish or enumeration district level incidence
-        must still be requested from the Barbados National Registry. The spatial join described
-        below is the test that turns this narrative into evidence.
-      </p>
-    </div>
-  </section>
-
-  <!-- ============ RESILIENCE PROJECTS ============ -->
-  <section class="section" id="resilience">
-    <h2>Resilience and Response</h2>
-    <p class="sub">
-      Barbados is not just a case study in pressure. It is also a place where serious work is
-      under way to repair, protect, and rebuild what tourism driven development has put at risk.
-      The sections below will document the policies, the community programmes, and the climate
-      adaptation efforts that aim to turn the pathway above around.
-    </p>
-
-    <div class="resilience-placeholder">
-      <p class="resilience-placeholder__title">Section in Progress</p>
-      <p>
-        This is the slot for the resilience and response section. Sophia will provide the text
-        for it shortly, covering specific projects such as coastal restoration, public space
-        recovery, agricultural revitalisation, planning reform, and the health system's NCD
-        response.
-      </p>
-    </div>
-  </section>
-
-  <!-- ============ DATA & METHODS ============ -->
-  <section class="section" id="data">
-    <h2>Data and Methods</h2>
-    <p class="sub">
-      Four data streams, deliberately integrated. Each card notes the source, how it enters the
-      analysis, and whether the layer is live on this site or awaiting your files.
-    </p>
-    <div class="cards">
-      <div class="data-card">
-        <span class="tag field">Field Observation</span>
-        <h3>A Week Long Field Study</h3>
-        <p>Participant observation, informal interviews, and a March 1 to 7 log across the West Coast, geocoded to map points.</p>
-        <ul>
-          <li>Thirteen logged sites, five thematic issues</li>
-          <li>Stakeholder interviews with agents, managers, residents, and gardeners</li>
-        </ul>
-        <p class="status ready">&#9679; Live on the map</p>
-      </div>
-      <div class="data-card">
-        <span class="tag field">Real Estate Listings</span>
-        <h3>The 7thHeaven Scrape and Regression</h3>
-        <p>One hundred and thirty five listings scraped on 12 May 2020. Multiple linear regression on log price with stepwise selection.</p>
-        <ul>
-          <li>Gated adds 81 percent, each room 25.5 percent, penthouse 143 percent</li>
-          <li>Hillside locations lose 40 percent, South Coast 51 percent</li>
-        </ul>
-        <p class="status ready">&#9679; Live as the regression chart</p>
-      </div>
-      <div class="data-card">
-        <span class="tag health">Health Outcomes</span>
-        <h3>Registry, Strategic Plan, and Census</h3>
-        <p>Barbados National Registry cardiovascular time series for 2013 to 2022, NCD risk factor prevalence, and the 2010 census enumeration district disease columns.</p>
-        <ul>
-          <li>Heart attacks rose 55 percent over the period; stroke incidence flat</li>
-          <li>2010 census provides roughly six hundred enumeration districts with disease and dwelling vintage counts</li>
-        </ul>
-        <p class="status ready">&#9679; Live as charts. Enumeration district join awaits the shapefile.</p>
-      </div>
-      <div class="data-card">
-        <span class="tag gis">GIS</span>
-        <h3>Parishes, Parcels, and Public Space</h3>
-        <p>Open parish boundaries from geoBoundaries power the map today. Parcels, land use, and public space layers can be dropped into <code>data/gis/</code>.</p>
-        <ul>
-          <li>Eleven parish polygons, live</li>
-          <li>Enumeration district shapefile, to obtain from the Barbados Statistical Service</li>
-        </ul>
-        <p class="status todo">&#9679; Open boundaries live; your layers pending</p>
-      </div>
-      <div class="data-card">
-        <span class="tag rs">Remote Sensing</span>
-        <h3>Land Cover Change</h3>
-        <p>Sixteen colormapped raster overlays produced by the GEE classification stack are now live on the map above. Earlier and recent classifications, conversion masks, manicured vegetation indices, NDVI trend, and classifier diagnostics are all represented.</p>
-        <ul>
-          <li>Sixteen layers from the v8 GEE outputs, all masked to the island outline</li>
-          <li>Pick any of them from the raster overlay control in the top right of the map</li>
-        </ul>
-        <p class="status ready">&#9679; All raster layers live</p>
-      </div>
-      <div class="data-card">
-        <span class="tag gis">Reproducibility</span>
-        <h3>Open and Static</h3>
-        <p>A static site with no build step, deployed straight from GitHub Pages. All data lives in <code>data/</code> with a README describing the schema for each layer.</p>
-        <ul>
-          <li>Leaflet and Chart.js, loaded from a content delivery network</li>
-          <li>Swap in new layers without touching the application code</li>
-        </ul>
-        <p class="status ready">&#9679; Ready to deploy</p>
-      </div>
-    </div>
-
-    <div class="note-box">
-      <strong>On causation.</strong> This site presents an <em>association and a mechanism</em>,
-      not a proven cause. The land use and health pathway it visualises is consistent with the WHO
-      Global Syndemic framing, which names urban design and land use as drivers of obesity.
-      Confirming the chain for Barbados specifically requires sub national cardiovascular incidence
-      and controls for wealth, age, and healthcare access. The analysis is structured to accept
-      exactly those data when they arrive.
-    </div>
-  </section>
-
-  <!-- ============ PLANNING MAPS GALLERY ============ -->
-  <section class="section" id="planning-maps">
-    <h2>The Government's Own Maps</h2>
-    <p class="sub">
-      Seventeen planning maps from the Barbados Physical Development Plan Amendment of October
-      2023, published by the Town and Country Planning Office. They are reproduced here at high
-      resolution. Click any thumbnail to view the map at full size, or use the Raster Overlay
-      control on the main map above to drape one of them across the island for visual comparison
-      with the satellite analysis layers.
-    </p>
-    <p class="sub" style="font-size:.82rem;opacity:.75;">
-      Source: Barbados Physical Development Plan Amendment, October 2023.
-      Government of Barbados, Town and Country Planning Office.
-    </p>
-
-    <div class="plan-map-gallery" id="plan-map-gallery">
-      <!-- Populated by main.js once planning_maps.json loads -->
-      <p class="plan-map-gallery__loading">Loading planning maps&hellip;</p>
-    </div>
-  </section>
-
-  <!-- ============ REFERENCES ============ -->
-  <section class="section" id="references">
-    <h2>References &amp; sources</h2>
-    <p class="sub">Academic literature from the original study, plus the health-data sources integrated here.</p>
-    <ul class="refs">
-      <li>Barrantes-Reynolds, M. P. (2011). The expansion of &ldquo;real estate tourism&rdquo; in coastal areas. <em>RASAALA</em>, 2(1), 51&ndash;70.</li>
-      <li>Belgrave, A., Grosvernor, T., &amp; Lowe, S. (2016). A Framework for Constructing a House Price Index &mdash; A Progress Report.</li>
-      <li>Bunce, M. (2008). The &lsquo;leisuring&rsquo; of rural landscapes in Barbados. <em>Geoforum</em>, 39(2), 969&ndash;979.</li>
-      <li>McHardy, P., &amp; Donovan, M. G. (2016). The State of Social Housing in Six Caribbean Countries.</li>
-      <li>Potter, R. B. (1986). Spatial Inequalities in Barbados, West Indies. <em>Trans. Inst. British Geographers</em>, 11(2), 183&ndash;198.</li>
-      <li>Potter, R. B. (1989). Urban Housing in Barbados, West Indies. <em>The Geographical Journal</em>, 155(1), 81&ndash;93.</li>
-      <li>Sheller, M. (2009). The new Caribbean complexity: Mobility systems, tourism and spatial rescaling. <em>Singapore J. Tropical Geography</em>, 30(2), 189&ndash;203.</li>
-      <li>Wu, H., et al. (2018). Influence Factors and Regression Model of Urban Housing Prices Based on Internet Open Access Data. <em>Sustainability</em>, 10(5).</li>
-      <li>Yusof, A., &amp; Ismail, S. (2012). Multiple Regressions in Analysing House Price Variations. <em>Communications of the IBIMA</em>, 1&ndash;9.</li>
-      <li>Barbados National Registry for Chronic NCDs. CVD Annual Report 2024 (heart attack &amp; stroke time series 2013&ndash;2022).</li>
-      <li>Ministry of Health &amp; Wellness. National Strategic Plan for NCD Prevention &amp; Control 2020&ndash;2025.</li>
-      <li>Barbados Statistical Service. 2010 Population &amp; Housing Census, enumeration-district demographics.</li>
-      <li>HoTNS (2012&ndash;13), GSHS (2011), GYTS (2013), WHO NCD estimates (2016).</li>
-      <li>Boundaries: geoBoundaries (gbOpen) ADM1 for Barbados. Imagery: Esri World Imagery; basemap &copy; OpenStreetMap contributors.</li>
-    </ul>
-  </section>
-
-  <!-- ============ FOOTER ============ -->
-  <footer>
-    <div class="credits">
-      <p>
-        <strong>Real Estate Tourism, Land Use &amp; Health on Barbados's West Coast</strong><br />
-        Sophia Chen &amp; Anastasia Ejov. Built as an open, map-driven scrollytelling publication.
-      </p>
-      <p style="opacity:0.7; font-size:0.8rem;">
-        Field coordinates are approximate. Health associations are exploratory, not causal claims.
-        Data and code in the <code>/data</code> directory of this repository.
-      </p>
-    </div>
-  </footer>
-
-  <!-- Portable chart panel. main.js moves it into the active chart step's
-       slot so the chart appears inline with the explanatory text, never over
-       the map. -->
-  <div class="chart-panel" id="chart-panel">
-    <h3 id="chart-title">Chart</h3>
-    <p class="sub" id="chart-sub"></p>
-    <div class="chart-wrap"><canvas id="chart-canvas"></canvas></div>
-    <p class="chart-source" id="chart-source"></p>
+    <div id="map-plan"></div>
   </div>
+</div>
 
-  <!-- ============ SCRIPTS ============ -->
-  <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-  <script src="js/charts.js"></script>
-  <script src="js/main.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+(function () {
+  "use strict";
+
+  // ---- Data base URL ----
+  // The embed loads its raster manifests and image overlays from GitHub Pages
+  // by default. If hosting the data elsewhere, set window.BARBADOS_DATA_BASE
+  // before this script runs (or change DEFAULT_BASE below).
+  var DEFAULT_BASE = "https://sophiachen-geo.github.io/barbados/";
+  var BASE = (window.BARBADOS_DATA_BASE || DEFAULT_BASE).replace(/\/?$/, "/");
+
+  var ISLAND_BOUNDS = L.latLngBounds([12.99, -59.69], [13.345, -59.41]);
+
+  // ---- Build both maps ----
+  var map = L.map("map", { zoomControl: true, scrollWheelZoom: true })
+    .fitBounds(ISLAND_BOUNDS);
+  var mapPlan = L.map("map-plan", { zoomControl: true, scrollWheelZoom: true })
+    .fitBounds(ISLAND_BOUNDS);
+
+  L.tileLayer(
+    "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+    { maxZoom: 19, attribution: "Imagery &copy; Esri, Maxar, Earthstar Geographics" }
+  ).addTo(map);
+  L.tileLayer(
+    "https://{s}.basemaps.cartocdn.com/rastertiles/voyager_nolabels/{z}/{x}/{y}{r}.png",
+    { maxZoom: 19, attribution: "&copy; OpenStreetMap, &copy; CARTO" }
+  ).addTo(mapPlan);
+
+  // ---- Linked pan and zoom ----
+  var syncing = false;
+  function bindSync(a, b) {
+    a.on("move zoomanim", function () {
+      if (syncing) return;
+      syncing = true;
+      b.setView(a.getCenter(), a.getZoom(), { animate: false });
+      syncing = false;
+    });
+  }
+  bindSync(map, mapPlan);
+  bindSync(mapPlan, map);
+
+  // ---- Legend control on the left map ----
+  var legend = null;
+  function setLegend(html) {
+    if (legend) { map.removeControl(legend); legend = null; }
+    if (!html) return;
+    legend = L.control({ position: "topright" });
+    legend.onAdd = function () {
+      var div = L.DomUtil.create("div", "legend");
+      div.innerHTML = html;
+      return div;
+    };
+    legend.addTo(map);
+  }
+
+  // ---- Raster manager (loads both manifests, routes layers to the right map) ----
+  var rasterManager = {
+    manifest: [],
+    layers: {},
+    load: function () {
+      var loadGee = fetch(BASE + "data/remote_sensing/layers.json")
+        .then(function (r) { return r.ok ? r.json() : []; })
+        .then(function (m) { (m || []).forEach(function (e) { e.category = "Satellite Analysis Layers"; }); return m || []; })
+        .catch(function () { return []; });
+      var loadPlan = fetch(BASE + "data/planning_maps.json")
+        .then(function (r) { return r.ok ? r.json() : []; })
+        .then(function (m) { (m || []).forEach(function (e) { e.category = "Government Planning Maps"; }); return m || []; })
+        .catch(function () { return []; });
+      return Promise.all([loadGee, loadPlan]).then(function (parts) {
+        rasterManager.manifest = parts[0].concat(parts[1]);
+        return rasterManager.manifest;
+      });
+    },
+    entry: function (id) {
+      for (var i = 0; i < this.manifest.length; i++) {
+        if (this.manifest[i].id === id) return this.manifest[i];
+      }
+      return null;
+    },
+    _targetMapFor: function (entry) {
+      return entry.category === "Government Planning Maps" ? mapPlan : map;
+    },
+    _ensure: function (id) {
+      if (this.layers[id]) return this.layers[id];
+      var e = this.entry(id);
+      if (!e) return null;
+      var isPlan = e.category === "Government Planning Maps";
+      var url = e.png.indexOf("http") === 0 ? e.png : BASE + e.png;
+      this.layers[id] = L.imageOverlay(url, e.bounds, {
+        opacity: isPlan ? 0.92 : 0.88,
+        interactive: false,
+        className: isPlan ? "plan-map-overlay" : "v8-raster"
+      });
+      return this.layers[id];
+    },
+    show: function (id) {
+      var lyr = this._ensure(id);
+      if (!lyr) return;
+      var e = this.entry(id);
+      var tgt = this._targetMapFor(e);
+      if (!tgt.hasLayer(lyr)) lyr.addTo(tgt);
+    },
+    hide: function (id) {
+      var lyr = this.layers[id];
+      if (!lyr) return;
+      if (map.hasLayer(lyr)) map.removeLayer(lyr);
+      if (mapPlan.hasLayer(lyr)) mapPlan.removeLayer(lyr);
+    },
+    hideCategory: function (category) {
+      var self = this;
+      Object.keys(this.layers).forEach(function (id) {
+        var e = self.entry(id);
+        if (e && e.category === category) self.hide(id);
+      });
+    },
+    setOpacity: function (id, v) {
+      var l = this.layers[id];
+      if (l && l.setOpacity) l.setOpacity(v);
+    }
+  };
+
+  function rasterLegendHTML(entry) {
+    if (!entry) return null;
+    var rows = (entry.legend || []).map(function (L) {
+      return '<i style="background:' + L.hex + '"></i>' + L.label;
+    }).join("<br>");
+    var view = "";
+    if (entry.category === "Government Planning Maps") {
+      view = '<p style="margin-top:.45rem;font-size:.78rem;"><a href="#" data-lightbox="' + entry.id + '" style="color:#2b6b8a;font-weight:600;text-decoration:none;">View at Full Size &rarr;</a></p>';
+    }
+    return '<h4>' + entry.title + '</h4>' +
+      '<p style="margin:0 0 .35rem;font-size:.75rem;opacity:.8">' + entry.desc + '</p>' +
+      rows + view;
+  }
+
+  function showRasterView(id) {
+    var e = rasterManager.entry(id);
+    if (!e) return;
+    // Only one satellite layer at a time
+    if (e.category === "Satellite Analysis Layers") {
+      rasterManager.hideCategory("Satellite Analysis Layers");
+    }
+    rasterManager.show(id);
+    setLegend(rasterLegendHTML(e));
+  }
+
+  // ---- Lightbox for planning map full-size view ----
+  function openLightbox(id) {
+    var entry = rasterManager.entry(id);
+    if (!entry) return;
+    var box = document.getElementById("lightbox");
+    if (!box) {
+      box = document.createElement("div");
+      box.id = "lightbox";
+      box.className = "lightbox";
+      box.innerHTML =
+        '<button class="lightbox__close" type="button" aria-label="Close">&times;</button>' +
+        '<figure class="lightbox__figure">' +
+          '<img class="lightbox__img" alt="" />' +
+          '<figcaption class="lightbox__cap"></figcaption>' +
+        '</figure>';
+      document.body.appendChild(box);
+      box.addEventListener("click", function (e) {
+        if (e.target === box || e.target.classList.contains("lightbox__close")) {
+          box.classList.remove("is-open");
+        }
+      });
+      document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape") box.classList.remove("is-open");
+      });
+    }
+    var url = entry.png.indexOf("http") === 0 ? entry.png : BASE + entry.png;
+    box.querySelector(".lightbox__img").src = url;
+    box.querySelector(".lightbox__img").alt = entry.title;
+    box.querySelector(".lightbox__cap").textContent = entry.title + ". " + entry.desc;
+    box.classList.add("is-open");
+  }
+  document.addEventListener("click", function (e) {
+    var t = e.target;
+    if (t && t.dataset && t.dataset.lightbox) {
+      e.preventDefault();
+      openLightbox(t.dataset.lightbox);
+    }
+  });
+
+  // ---- Satellite picker (top-right of left map) ----
+  function buildSatellitePicker() {
+    var ctrl = L.control({ position: "topright" });
+    ctrl.onAdd = function () {
+      var div = L.DomUtil.create("div", "raster-picker");
+      var entries = rasterManager.manifest.filter(function (e) { return e.category === "Satellite Analysis Layers"; });
+      var options = '<option value="">Pick a Raster Dataset</option>';
+      entries.forEach(function (e) {
+        options += '<option value="' + e.id + '">' + e.title + '</option>';
+      });
+      div.innerHTML =
+        '<button class="raster-picker__clear" type="button">&times;</button>' +
+        '<label class="raster-picker__label">Satellite Analysis Layers</label>' +
+        '<select class="raster-picker__select">' + options + '</select>';
+      var sel = div.querySelector(".raster-picker__select");
+      var clr = div.querySelector(".raster-picker__clear");
+      L.DomEvent.disableClickPropagation(div);
+      L.DomEvent.disableScrollPropagation(div);
+      L.DomEvent.on(sel, "change", function () { if (sel.value) showRasterView(sel.value); });
+      L.DomEvent.on(clr, "click", function () {
+        sel.value = "";
+        rasterManager.hideCategory("Satellite Analysis Layers");
+        setLegend(null);
+      });
+      window.__satPicker = { select: sel };
+      return div;
+    };
+    ctrl.addTo(map);
+  }
+
+  // ---- Planning panel (top-left of right map) ----
+  function buildPlanningPanel() {
+    var planEntries = rasterManager.manifest.filter(function (e) { return e.category === "Government Planning Maps"; });
+    if (!planEntries.length) return;
+    var ctrl = L.control({ position: "topleft" });
+    ctrl.onAdd = function () {
+      var div = L.DomUtil.create("div", "plan-panel");
+      var rows = planEntries.map(function (e) {
+        var legendUrl = e.legend_png ? (e.legend_png.indexOf("http") === 0 ? e.legend_png : BASE + e.legend_png) : "";
+        return (
+          '<div class="plan-panel__row" data-id="' + e.id + '">' +
+            '<label class="plan-panel__check">' +
+              '<input type="checkbox" data-plan-toggle="' + e.id + '" />' +
+              '<span>' + e.title + '</span>' +
+            '</label>' +
+            '<div class="plan-panel__controls" hidden>' +
+              '<input type="range" min="0" max="100" value="78" data-plan-opacity="' + e.id + '" />' +
+              '<span class="plan-panel__opacity-val">78%</span>' +
+              ' &middot; <a href="#" data-lightbox="' + e.id + '" class="plan-panel__view">view</a>' +
+              ' &middot; <a href="#" data-plan-legend="' + e.id + '" class="plan-panel__legend-btn">legend</a>' +
+            '</div>' +
+            (legendUrl ? '<figure class="plan-panel__legend" hidden><img loading="lazy" src="' + legendUrl + '" alt="" /></figure>' : "") +
+          '</div>'
+        );
+      }).join("");
+      div.innerHTML =
+        '<div class="plan-panel__head">' +
+          '<strong>Government Planning Maps</strong>' +
+          '<button class="plan-panel__collapse" type="button">&minus;</button>' +
+        '</div>' +
+        '<p class="plan-panel__hint">Pick one or more layers. Each has its own opacity and legend.</p>' +
+        '<div class="plan-panel__body">' + rows + '</div>';
+
+      L.DomEvent.disableClickPropagation(div);
+      L.DomEvent.disableScrollPropagation(div);
+
+      div.querySelectorAll("[data-plan-toggle]").forEach(function (cb) {
+        L.DomEvent.on(cb, "change", function () {
+          var id = cb.dataset.planToggle;
+          var row = cb.closest(".plan-panel__row");
+          var controls = row.querySelector(".plan-panel__controls");
+          if (cb.checked) {
+            rasterManager.show(id);
+            rasterManager.setOpacity(id, 0.78);
+            controls.hidden = false;
+          } else {
+            rasterManager.hide(id);
+            controls.hidden = true;
+            var f = row.querySelector(".plan-panel__legend");
+            if (f) f.hidden = true;
+          }
+        });
+      });
+      div.querySelectorAll("[data-plan-opacity]").forEach(function (s) {
+        L.DomEvent.on(s, "input", function () {
+          rasterManager.setOpacity(s.dataset.planOpacity, parseFloat(s.value) / 100);
+          var lbl = s.parentNode.querySelector(".plan-panel__opacity-val");
+          if (lbl) lbl.textContent = Math.round(s.value) + "%";
+        });
+      });
+      div.querySelectorAll("[data-plan-legend]").forEach(function (a) {
+        L.DomEvent.on(a, "click", function (e) {
+          e.preventDefault();
+          var row = div.querySelector('.plan-panel__row[data-id="' + a.dataset.planLegend + '"]');
+          var f = row.querySelector(".plan-panel__legend");
+          if (f) f.hidden = !f.hidden;
+        });
+      });
+
+      var btn = div.querySelector(".plan-panel__collapse");
+      var body = div.querySelector(".plan-panel__body");
+      var hint = div.querySelector(".plan-panel__hint");
+      L.DomEvent.on(btn, "click", function () {
+        var collapse = !body.hidden;
+        body.hidden = collapse;
+        hint.hidden = collapse;
+        div.classList.toggle("is-collapsed", collapse);
+        btn.innerHTML = collapse ? "&plus;" : "&minus;";
+      });
+
+      return div;
+    };
+    ctrl.addTo(mapPlan);
+  }
+
+  // ---- Time scrubber (bottom-left of left map) ----
+  function buildTimeScrubber() {
+    var EPOCHS = [
+      { id: "class_1984_92", label: "1984 to 1992" },
+      { id: "class_1993_01", label: "1993 to 2001" },
+      { id: "class_2002_10", label: "2002 to 2010" },
+      { id: "class_2011_18", label: "2011 to 2018" },
+      { id: "class_2019_25", label: "2019 to 2025" }
+    ];
+    if (!rasterManager.entry(EPOCHS[0].id)) return;
+    var ctrl = L.control({ position: "bottomleft" });
+    ctrl.onAdd = function () {
+      var div = L.DomUtil.create("div", "time-scrubber");
+      var ticks = EPOCHS.map(function (e, i) {
+        return '<span class="time-scrubber__tick" data-i="' + i + '">' + e.label + '</span>';
+      }).join("");
+      div.innerHTML =
+        '<div class="time-scrubber__head">' +
+          '<button class="time-scrubber__play" type="button">&#9654;</button>' +
+          '<strong class="time-scrubber__title">Land Cover Time Series, 1984 to 2025</strong>' +
+          '<button class="time-scrubber__collapse" type="button">&minus;</button>' +
+        '</div>' +
+        '<div class="time-scrubber__body">' +
+          '<div class="time-scrubber__ticks">' + ticks + '</div>' +
+          '<input type="range" min="0" max="4" step="1" value="0" class="time-scrubber__slider" />' +
+        '</div>';
+
+      L.DomEvent.disableClickPropagation(div);
+      L.DomEvent.disableScrollPropagation(div);
+
+      var slider = div.querySelector(".time-scrubber__slider");
+      var tickEls = Array.prototype.slice.call(div.querySelectorAll(".time-scrubber__tick"));
+      var playBtn = div.querySelector(".time-scrubber__play");
+      var collapseBtn = div.querySelector(".time-scrubber__collapse");
+      var body = div.querySelector(".time-scrubber__body");
+
+      function setEpoch(idx) {
+        var spec = EPOCHS[idx];
+        if (!spec) return;
+        tickEls.forEach(function (t, i) { t.classList.toggle("is-active", i === idx); });
+        slider.value = String(idx);
+        showRasterView(spec.id);
+        if (window.__satPicker && window.__satPicker.select) {
+          window.__satPicker.select.value = spec.id;
+        }
+      }
+      L.DomEvent.on(slider, "input", function () { setEpoch(parseInt(slider.value, 10)); });
+      tickEls.forEach(function (t) {
+        L.DomEvent.on(t, "click", function () { setEpoch(parseInt(t.dataset.i, 10)); });
+      });
+
+      var playInterval = null;
+      L.DomEvent.on(playBtn, "click", function () {
+        if (playInterval) {
+          clearInterval(playInterval); playInterval = null;
+          playBtn.innerHTML = "&#9654;";
+          return;
+        }
+        playBtn.innerHTML = "&#10073;&#10073;";
+        var i = parseInt(slider.value, 10);
+        playInterval = setInterval(function () {
+          i = (i + 1) % EPOCHS.length;
+          setEpoch(i);
+        }, 1500);
+      });
+
+      L.DomEvent.on(collapseBtn, "click", function () {
+        var collapse = !body.hidden;
+        body.hidden = collapse;
+        div.classList.toggle("is-collapsed", collapse);
+        collapseBtn.innerHTML = collapse ? "&plus;" : "&minus;";
+      });
+
+      return div;
+    };
+    ctrl.addTo(map);
+  }
+
+  // ---- Boot ----
+  rasterManager.load().then(function () {
+    buildSatellitePicker();
+    buildPlanningPanel();
+    buildTimeScrubber();
+    window.setTimeout(function () {
+      map.invalidateSize();
+      mapPlan.invalidateSize();
+      mapPlan.setView(map.getCenter(), map.getZoom(), { animate: false });
+    }, 300);
+  });
+
+  window.addEventListener("resize", function () {
+    map.invalidateSize();
+    mapPlan.invalidateSize();
+  });
+})();
+</script>
+
 </body>
 </html>

@@ -14,7 +14,8 @@
         -59.4
       ]
     ],
-    "source_page": 201
+    "source_page": 201,
+    "legend_png": "data/planning_maps/plan_map_01_legend.jpg"
   },
   {
     "id": "plan_map_02",
@@ -31,7 +32,8 @@
         -59.4
       ]
     ],
-    "source_page": 203
+    "source_page": 203,
+    "legend_png": "data/planning_maps/plan_map_02_legend.jpg"
   },
   {
     "id": "plan_map_03",
@@ -48,7 +50,8 @@
         -59.4
       ]
     ],
-    "source_page": 205
+    "source_page": 205,
+    "legend_png": "data/planning_maps/plan_map_03_legend.jpg"
   },
   {
     "id": "plan_map_04",
@@ -65,7 +68,8 @@
         -59.4
       ]
     ],
-    "source_page": 207
+    "source_page": 207,
+    "legend_png": "data/planning_maps/plan_map_04_legend.jpg"
   },
   {
     "id": "plan_map_05",
@@ -82,7 +86,8 @@
         -59.4
       ]
     ],
-    "source_page": 209
+    "source_page": 209,
+    "legend_png": "data/planning_maps/plan_map_05_legend.jpg"
   },
   {
     "id": "plan_map_06",
@@ -99,7 +104,8 @@
         -59.4
       ]
     ],
-    "source_page": 211
+    "source_page": 211,
+    "legend_png": "data/planning_maps/plan_map_06_legend.jpg"
   },
   {
     "id": "plan_map_07",
@@ -116,7 +122,8 @@
         -59.4
       ]
     ],
-    "source_page": 213
+    "source_page": 213,
+    "legend_png": "data/planning_maps/plan_map_07_legend.jpg"
   },
   {
     "id": "plan_map_08",
@@ -133,7 +140,8 @@
         -59.4
       ]
     ],
-    "source_page": 215
+    "source_page": 215,
+    "legend_png": "data/planning_maps/plan_map_08_legend.jpg"
   },
   {
     "id": "plan_map_09",
@@ -150,7 +158,8 @@
         -59.4
       ]
     ],
-    "source_page": 217
+    "source_page": 217,
+    "legend_png": "data/planning_maps/plan_map_09_legend.jpg"
   },
   {
     "id": "plan_map_10",
@@ -167,7 +176,8 @@
         -59.4
       ]
     ],
-    "source_page": 219
+    "source_page": 219,
+    "legend_png": "data/planning_maps/plan_map_10_legend.jpg"
   },
   {
     "id": "plan_map_11",
@@ -184,7 +194,8 @@
         -59.4
       ]
     ],
-    "source_page": 221
+    "source_page": 221,
+    "legend_png": "data/planning_maps/plan_map_11_legend.jpg"
   },
   {
     "id": "plan_map_12",
@@ -201,7 +212,8 @@
         -59.4
       ]
     ],
-    "source_page": 223
+    "source_page": 223,
+    "legend_png": "data/planning_maps/plan_map_12_legend.jpg"
   },
   {
     "id": "plan_map_13",
@@ -218,7 +230,8 @@
         -59.4
       ]
     ],
-    "source_page": 225
+    "source_page": 225,
+    "legend_png": "data/planning_maps/plan_map_13_legend.jpg"
   },
   {
     "id": "plan_map_14",
@@ -235,7 +248,8 @@
         -59.4
       ]
     ],
-    "source_page": 227
+    "source_page": 227,
+    "legend_png": "data/planning_maps/plan_map_14_legend.jpg"
   },
   {
     "id": "plan_map_15",
@@ -252,7 +266,8 @@
         -59.4
       ]
     ],
-    "source_page": 229
+    "source_page": 229,
+    "legend_png": "data/planning_maps/plan_map_15_legend.jpg"
   },
   {
     "id": "plan_map_16",
@@ -269,7 +284,8 @@
         -59.4
       ]
     ],
-    "source_page": 231
+    "source_page": 231,
+    "legend_png": "data/planning_maps/plan_map_16_legend.jpg"
   },
   {
     "id": "plan_map_17",
@@ -286,6 +302,7 @@
         -59.4
       ]
     ],
-    "source_page": 233
+    "source_page": 233,
+    "legend_png": "data/planning_maps/plan_map_17_legend.jpg"
   }
 ]

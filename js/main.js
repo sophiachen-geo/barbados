@@ -143,6 +143,21 @@
     hideAll: function () {
       var self = this;
       Object.keys(this.layers).forEach(function (id) { self.hide(id); });
+    },
+    hideCategory: function (category) {
+      var self = this;
+      Object.keys(this.layers).forEach(function (id) {
+        var e = self.entry(id);
+        if (e && e.category === category) self.hide(id);
+      });
+    },
+    setOpacity: function (id, value) {
+      var lyr = this.layers[id];
+      if (lyr && lyr.setOpacity) lyr.setOpacity(value);
+    },
+    isActive: function (id) {
+      var lyr = this.layers[id];
+      return lyr ? map.hasLayer(lyr) : false;
     }
   };
 
@@ -219,43 +234,214 @@
     map.flyToBounds(bounds, { duration: 1.0, padding: [10, 10] });
   }
 
-  // ---------- Raster picker control (always-visible dropdown) ----------
-  function buildRasterPicker() {
+  // ---------- Satellite raster picker (top-right): single select, GEE only ----------
+  function buildSatellitePicker() {
     var ctrl = L.control({ position: "topright" });
     ctrl.onAdd = function () {
       var div = L.DomUtil.create("div", "raster-picker");
-
-      // Group entries by category so the dropdown reads naturally
-      var groups = {};
-      rasterManager.manifest.forEach(function (e) {
-        var cat = e.category || "Layers";
-        (groups[cat] = groups[cat] || []).push(e);
+      var entries = rasterManager.manifest.filter(function (e) {
+        return e.category === "Satellite Analysis Layers";
       });
-
       var options = '<option value="">Pick a Raster Dataset</option>';
-      Object.keys(groups).forEach(function (cat) {
-        options += '<optgroup label="' + cat + '">';
-        groups[cat].forEach(function (e) {
-          options += '<option value="' + e.id + '">' + e.title + '</option>';
-        });
-        options += '</optgroup>';
+      entries.forEach(function (e) {
+        options += '<option value="' + e.id + '">' + e.title + '</option>';
       });
-
       div.innerHTML =
-        '<button class="raster-picker__clear" type="button" title="Hide overlay" aria-label="Clear overlay">&times;</button>' +
-        '<label class="raster-picker__label">Raster Overlay</label>' +
+        '<button class="raster-picker__clear" type="button" title="Clear overlay" aria-label="Clear">&times;</button>' +
+        '<label class="raster-picker__label">Satellite Analysis Layers</label>' +
         '<select class="raster-picker__select">' + options + '</select>';
       var sel = div.querySelector(".raster-picker__select");
       var clr = div.querySelector(".raster-picker__clear");
       L.DomEvent.disableClickPropagation(div);
+      L.DomEvent.disableScrollPropagation(div);
       L.DomEvent.on(sel, "change", function () {
         if (sel.value) showRasterView(sel.value);
       });
       L.DomEvent.on(clr, "click", function () {
         sel.value = "";
-        rasterManager.hideAll();
+        rasterManager.hideCategory("Satellite Analysis Layers");
         setLegend(null);
       });
+      // Expose so the time scrubber can sync the dropdown
+      window.__satPicker = { select: sel };
+      return div;
+    };
+    ctrl.addTo(map);
+  }
+
+  // ---------- Planning maps panel (top-left): multi-select + opacity sliders ----------
+  function buildPlanningPanel() {
+    var ctrl = L.control({ position: "topleft" });
+    var planEntries = rasterManager.manifest.filter(function (e) {
+      return e.category === "Government Planning Maps";
+    });
+    if (!planEntries.length) return;
+
+    ctrl.onAdd = function () {
+      var div = L.DomUtil.create("div", "plan-panel");
+      var rows = planEntries.map(function (e) {
+        return (
+          '<div class="plan-panel__row" data-id="' + e.id + '">' +
+            '<label class="plan-panel__check">' +
+              '<input type="checkbox" data-plan-toggle="' + e.id + '" />' +
+              '<span>' + e.title + '</span>' +
+            '</label>' +
+            '<div class="plan-panel__controls" hidden>' +
+              '<input type="range" min="0" max="100" value="78" data-plan-opacity="' + e.id + '" />' +
+              '<span class="plan-panel__opacity-val">78%</span>' +
+              ' &middot; <a href="#" data-lightbox="' + e.id + '" class="plan-panel__view">view</a>' +
+              ' &middot; <a href="#" data-plan-legend="' + e.id + '" class="plan-panel__legend-btn">legend</a>' +
+            '</div>' +
+            '<figure class="plan-panel__legend" hidden>' +
+              '<img loading="lazy" src="' + e.legend_png + '" alt="Legend for ' + e.title + '" />' +
+            '</figure>' +
+          '</div>'
+        );
+      }).join("");
+      div.innerHTML =
+        '<div class="plan-panel__head">' +
+          '<strong>Government Planning Maps</strong>' +
+          '<button class="plan-panel__collapse" type="button" aria-label="Collapse">&minus;</button>' +
+        '</div>' +
+        '<p class="plan-panel__hint">Pick one or more layers to overlay. Each has its own opacity slider and legend.</p>' +
+        '<div class="plan-panel__body">' + rows + '</div>';
+
+      L.DomEvent.disableClickPropagation(div);
+      L.DomEvent.disableScrollPropagation(div);
+
+      // Checkbox toggles overlay
+      div.querySelectorAll("[data-plan-toggle]").forEach(function (cb) {
+        L.DomEvent.on(cb, "change", function () {
+          var id = cb.dataset.planToggle;
+          var row = cb.closest(".plan-panel__row");
+          var controls = row.querySelector(".plan-panel__controls");
+          if (cb.checked) {
+            rasterManager.show(id);
+            // Set initial opacity to 0.78
+            rasterManager.setOpacity(id, 0.78);
+            controls.hidden = false;
+          } else {
+            rasterManager.hide(id);
+            controls.hidden = true;
+            // Also hide expanded legend if open
+            var legendFig = row.querySelector(".plan-panel__legend");
+            if (legendFig) legendFig.hidden = true;
+          }
+        });
+      });
+
+      // Opacity slider updates layer opacity in real time
+      div.querySelectorAll("[data-plan-opacity]").forEach(function (slider) {
+        L.DomEvent.on(slider, "input", function () {
+          var id = slider.dataset.planOpacity;
+          var pct = parseFloat(slider.value);
+          rasterManager.setOpacity(id, pct / 100);
+          var label = slider.parentNode.querySelector(".plan-panel__opacity-val");
+          if (label) label.textContent = Math.round(pct) + "%";
+        });
+      });
+
+      // Legend toggle
+      div.querySelectorAll("[data-plan-legend]").forEach(function (a) {
+        L.DomEvent.on(a, "click", function (e) {
+          e.preventDefault();
+          var id = a.dataset.planLegend;
+          var row = div.querySelector('.plan-panel__row[data-id="' + id + '"]');
+          var fig = row.querySelector(".plan-panel__legend");
+          if (fig) fig.hidden = !fig.hidden;
+        });
+      });
+
+      // Header collapse
+      var collapseBtn = div.querySelector(".plan-panel__collapse");
+      var body = div.querySelector(".plan-panel__body");
+      var hint = div.querySelector(".plan-panel__hint");
+      L.DomEvent.on(collapseBtn, "click", function () {
+        var collapsed = body.hidden;
+        body.hidden = !collapsed;
+        hint.hidden = !collapsed;
+        collapseBtn.textContent = collapsed ? "−" : "+";
+      });
+
+      return div;
+    };
+    ctrl.addTo(map);
+  }
+
+  // ---------- Time scrubber (bottom-left): drag through 1984 to 2025 ----------
+  function buildTimeScrubber() {
+    var EPOCHS = [
+      { id: "class_1984_92", label: "1984 to 1992" },
+      { id: "class_1993_01", label: "1993 to 2001" },
+      { id: "class_2002_10", label: "2002 to 2010" },
+      { id: "class_2011_18", label: "2011 to 2018" },
+      { id: "class_2019_25", label: "2019 to 2025" }
+    ];
+    // Only build if at least the first epoch exists in the manifest
+    if (!rasterManager.entry(EPOCHS[0].id)) return;
+
+    var ctrl = L.control({ position: "bottomleft" });
+    ctrl.onAdd = function () {
+      var div = L.DomUtil.create("div", "time-scrubber");
+      var tickHtml = EPOCHS.map(function (e, i) {
+        return '<span class="time-scrubber__tick" data-i="' + i + '">' + e.label + '</span>';
+      }).join("");
+      div.innerHTML =
+        '<div class="time-scrubber__head">' +
+          '<button class="time-scrubber__play" type="button" aria-label="Play">&#9654;</button>' +
+          '<strong>Land Cover Time Series, 1984 to 2025</strong>' +
+        '</div>' +
+        '<div class="time-scrubber__ticks">' + tickHtml + '</div>' +
+        '<input type="range" min="0" max="4" step="1" value="0" class="time-scrubber__slider" />';
+
+      L.DomEvent.disableClickPropagation(div);
+      L.DomEvent.disableScrollPropagation(div);
+
+      var slider = div.querySelector(".time-scrubber__slider");
+      var ticks = Array.prototype.slice.call(div.querySelectorAll(".time-scrubber__tick"));
+      var playBtn = div.querySelector(".time-scrubber__play");
+
+      function setEpoch(idx) {
+        var spec = EPOCHS[idx];
+        if (!spec) return;
+        ticks.forEach(function (t, i) {
+          t.classList.toggle("is-active", i === idx);
+        });
+        slider.value = String(idx);
+        // Drive the same showRasterView so legend updates and parishes overlay
+        showRasterView(spec.id);
+        // Sync the right-side picker dropdown if present
+        if (window.__satPicker && window.__satPicker.select) {
+          window.__satPicker.select.value = spec.id;
+        }
+      }
+
+      L.DomEvent.on(slider, "input", function () {
+        setEpoch(parseInt(slider.value, 10));
+      });
+      ticks.forEach(function (t) {
+        L.DomEvent.on(t, "click", function () {
+          setEpoch(parseInt(t.dataset.i, 10));
+        });
+      });
+
+      var playInterval = null;
+      L.DomEvent.on(playBtn, "click", function () {
+        if (playInterval) {
+          clearInterval(playInterval);
+          playInterval = null;
+          playBtn.innerHTML = "&#9654;";
+          return;
+        }
+        playBtn.innerHTML = "&#10073;&#10073;"; // pause symbol
+        var i = parseInt(slider.value, 10);
+        playInterval = setInterval(function () {
+          i = (i + 1) % EPOCHS.length;
+          setEpoch(i);
+        }, 1500);
+      });
+
+      // Don't auto-activate; user starts when ready
       return div;
     };
     ctrl.addTo(map);
@@ -425,9 +611,10 @@
   function showMap(view) {
     chartPanel.classList.remove("is-visible");
     badge.textContent = BADGES[view] || "Map";
-    // Any non-raster view should hide the overlays
+    // When switching to a non-raster view, hide the satellite overlays
+    // but keep any planning maps the user has explicitly checked on.
     if (!(view && view.indexOf("raster_") === 0)) {
-      rasterManager.hideAll();
+      rasterManager.hideCategory("Satellite Analysis Layers");
     }
     if (views[view]) views[view]();
     // Leaflet needs a nudge after the sticky container settles.
@@ -479,7 +666,11 @@
       BADGES["raster_" + e.id] = "Raster · " + e.title;
     });
 
-    if (rasterManager.manifest.length) buildRasterPicker();
+    if (rasterManager.manifest.length) {
+      buildSatellitePicker();
+      buildPlanningPanel();
+      buildTimeScrubber();
+    }
 
     // Populate the planning map gallery (thumbnails click through to lightbox)
     var galleryEl = document.getElementById("plan-map-gallery");

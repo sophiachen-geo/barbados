@@ -75,12 +75,27 @@
     activeId: null,
 
     load: function () {
-      return fetch("data/remote_sensing/layers.json").then(function (r) {
+      // Load both the GEE-derived raster manifest and the planning-maps manifest,
+      // tag each entry with its category, and merge into a single list.
+      var loadGee = fetch("data/remote_sensing/layers.json").then(function (r) {
         if (!r.ok) throw new Error("Could not load layers.json (" + r.status + ")");
         return r.json();
       }).then(function (m) {
-        rasterManager.manifest = m;
+        m.forEach(function (e) { e.category = "Satellite Analysis Layers"; });
         return m;
+      }).catch(function (e) { console.warn("GEE manifest unavailable:", e.message); return []; });
+
+      var loadPlan = fetch("data/planning_maps.json").then(function (r) {
+        if (!r.ok) throw new Error("Could not load planning_maps.json (" + r.status + ")");
+        return r.json();
+      }).then(function (m) {
+        m.forEach(function (e) { e.category = "Government Planning Maps"; });
+        return m;
+      }).catch(function (e) { console.warn("Planning maps unavailable:", e.message); return []; });
+
+      return Promise.all([loadGee, loadPlan]).then(function (parts) {
+        rasterManager.manifest = parts[0].concat(parts[1]);
+        return rasterManager.manifest;
       });
     },
     entry: function (id) {
@@ -93,8 +108,14 @@
       if (this.layers[id]) return this.layers[id];
       var e = this.entry(id);
       if (!e) return null;
+      // Planning maps are scanned pages with legend chrome, so they look
+      // better at lower opacity over the basemap. GEE rasters are masked to
+      // the island so they can go higher.
+      var isPlan = e.category === "Government Planning Maps";
       this.layers[id] = L.imageOverlay(e.png, e.bounds, {
-        opacity: 0.85, interactive: false, className: "v8-raster"
+        opacity: isPlan ? 0.78 : 0.88,
+        interactive: false,
+        className: isPlan ? "plan-map-overlay" : "v8-raster"
       });
       return this.layers[id];
     },
@@ -130,10 +151,57 @@
     var rows = (entry.legend || []).map(function (L) {
       return '<i style="background:' + L.hex + '"></i>' + L.label;
     }).join("<br>");
+    var viewLink = "";
+    if (entry.category === "Government Planning Maps") {
+      // Planning maps carry their own internal legend, so we link the user
+      // to the full size version in the gallery lightbox.
+      viewLink = '<p style="margin-top:.45rem;font-size:.78rem;">' +
+        '<a href="#" data-lightbox="' + entry.id + '" class="legend-lightbox-link">View at Full Size &rarr;</a></p>';
+    }
     return '<h4>' + entry.title + '</h4>' +
       '<p style="margin:0 0 .35rem;font-size:.75rem;opacity:.8">' + entry.desc + '</p>' +
-      rows;
+      rows + viewLink;
   }
+
+  // ---------- Lightbox for full size planning maps ----------
+  function openLightbox(id) {
+    var entry = rasterManager.entry(id);
+    if (!entry) return;
+    var box = document.getElementById("lightbox");
+    if (!box) {
+      box = document.createElement("div");
+      box.id = "lightbox";
+      box.className = "lightbox";
+      box.innerHTML =
+        '<button class="lightbox__close" type="button" aria-label="Close">&times;</button>' +
+        '<figure class="lightbox__figure">' +
+          '<img class="lightbox__img" alt="" />' +
+          '<figcaption class="lightbox__cap"></figcaption>' +
+        '</figure>';
+      document.body.appendChild(box);
+      box.addEventListener("click", function (e) {
+        if (e.target === box || e.target.classList.contains("lightbox__close")) {
+          box.classList.remove("is-open");
+        }
+      });
+      document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape") box.classList.remove("is-open");
+      });
+    }
+    box.querySelector(".lightbox__img").src = entry.png;
+    box.querySelector(".lightbox__img").alt = entry.title;
+    box.querySelector(".lightbox__cap").textContent = entry.title + ". " + entry.desc;
+    box.classList.add("is-open");
+  }
+
+  // Delegate clicks from legend links + the gallery thumbnails
+  document.addEventListener("click", function (e) {
+    var t = e.target;
+    if (t && t.dataset && t.dataset.lightbox) {
+      e.preventDefault();
+      openLightbox(t.dataset.lightbox);
+    }
+  });
 
   function showRasterView(id) {
     var entry = rasterManager.entry(id);
@@ -156,10 +224,23 @@
     var ctrl = L.control({ position: "topright" });
     ctrl.onAdd = function () {
       var div = L.DomUtil.create("div", "raster-picker");
-      var options = '<option value="">Pick a Raster Dataset</option>';
+
+      // Group entries by category so the dropdown reads naturally
+      var groups = {};
       rasterManager.manifest.forEach(function (e) {
-        options += '<option value="' + e.id + '">' + e.title + '</option>';
+        var cat = e.category || "Layers";
+        (groups[cat] = groups[cat] || []).push(e);
       });
+
+      var options = '<option value="">Pick a Raster Dataset</option>';
+      Object.keys(groups).forEach(function (cat) {
+        options += '<optgroup label="' + cat + '">';
+        groups[cat].forEach(function (e) {
+          options += '<option value="' + e.id + '">' + e.title + '</option>';
+        });
+        options += '</optgroup>';
+      });
+
       div.innerHTML =
         '<button class="raster-picker__clear" type="button" title="Hide overlay" aria-label="Clear overlay">&times;</button>' +
         '<label class="raster-picker__label">Raster Overlay</label>' +
@@ -399,6 +480,26 @@
     });
 
     if (rasterManager.manifest.length) buildRasterPicker();
+
+    // Populate the planning map gallery (thumbnails click through to lightbox)
+    var galleryEl = document.getElementById("plan-map-gallery");
+    if (galleryEl) {
+      var planEntries = rasterManager.manifest.filter(function (e) {
+        return e.category === "Government Planning Maps";
+      });
+      if (planEntries.length) {
+        galleryEl.innerHTML = planEntries.map(function (e) {
+          return '<figure class="plan-thumb">' +
+            '<a href="#" data-lightbox="' + e.id + '" title="' + e.title + '">' +
+              '<img loading="lazy" src="' + e.png + '" alt="' + e.title + '" />' +
+            '</a>' +
+            '<figcaption>' + e.title + '</figcaption>' +
+          '</figure>';
+        }).join("");
+      } else {
+        galleryEl.innerHTML = '<p style="color:#8a8170;font-style:italic;">No planning maps found in data/planning_maps.json.</p>';
+      }
+    }
 
     views.overview();
     initScroller();

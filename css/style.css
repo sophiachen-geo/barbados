@@ -487,3 +487,104 @@ footer .credits { max-width: 760px; margin: 0 auto; }
   margin-top: 0.4rem;
   font-style: italic;
 }
+
+/* ---------- PLANNING MAP GALLERY + LIGHTBOX ---------- */
+.plan-map-gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 1.1rem;
+  margin-top: 1.5rem;
+}
+.plan-map-gallery__loading {
+  grid-column: 1 / -1;
+  color: #8a8170;
+  font-style: italic;
+}
+.plan-thumb {
+  margin: 0;
+  background: #fff;
+  border: 1px solid #d6cdb7;
+  border-radius: 8px;
+  overflow: hidden;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+.plan-thumb:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
+}
+.plan-thumb a {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+}
+.plan-thumb img {
+  width: 100%;
+  display: block;
+  background: #faf6ec;
+}
+.plan-thumb figcaption {
+  padding: 0.55rem 0.7rem 0.7rem;
+  font-size: 0.78rem;
+  color: #3a3527;
+  line-height: 1.35;
+  background: #fbf6ea;
+  border-top: 1px solid #ede7da;
+}
+
+.lightbox {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 12, 8, 0.92);
+  z-index: 10000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 3vh 3vw;
+  cursor: zoom-out;
+}
+.lightbox.is-open { display: flex; }
+.lightbox__figure {
+  max-width: 95vw;
+  max-height: 92vh;
+  margin: 0;
+  background: #fff;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+}
+.lightbox__img {
+  max-width: 100%;
+  max-height: 80vh;
+  display: block;
+  margin: auto;
+}
+.lightbox__cap {
+  padding: 0.7rem 1rem;
+  background: #2b2820;
+  color: #f3eee2;
+  font-size: 0.88rem;
+  text-align: center;
+}
+.lightbox__close {
+  position: absolute;
+  top: 14px;
+  right: 18px;
+  background: transparent;
+  border: none;
+  color: #f3eee2;
+  font-size: 36px;
+  line-height: 1;
+  cursor: pointer;
+  z-index: 10001;
+}
+.legend-lightbox-link {
+  color: #2b6b8a;
+  font-weight: 600;
+  text-decoration: none;
+}
+.legend-lightbox-link:hover { text-decoration: underline; }
+
+/* The planning map overlays carry their own legends, so don't pixelate */
+.plan-map-overlay { image-rendering: auto; opacity: 0.78; }

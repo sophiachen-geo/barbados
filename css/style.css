@@ -129,11 +129,9 @@ a { color: var(--teal-dark); }
   font-size: 0.76rem; color: var(--teal); font-weight: 700; margin-bottom: 0.6rem;
 }
 
-/* ---------- SCROLLYTELLING ---------- */
+/* ---------- SCROLLYTELLING (sticky maps on top, narrative below) ---------- */
 #scrolly {
   position: relative;
-  display: flex;
-  gap: 0;
   max-width: var(--maxw);
   margin: 2rem auto;
   padding: 0 1.2rem;
@@ -141,16 +139,18 @@ a { color: var(--teal-dark); }
 .scrolly__graphic {
   position: sticky;
   top: 0;
-  height: 100vh;
-  flex: 1 1 58%;
-  align-self: flex-start;
+  z-index: 20;
+  background: var(--paper);
+  padding: 0.6rem 0 0.6rem;
+  height: 76vh;
+  min-height: 500px;
   display: flex;
-  align-items: center;
+  align-items: stretch;
 }
 .graphic-card {
   position: relative;
   width: 100%;
-  height: 84vh;
+  height: 100%;
   border-radius: 14px;
   overflow: hidden;
   box-shadow: var(--shadow);
@@ -190,15 +190,17 @@ a { color: var(--teal-dark); }
 }
 
 .scrolly__steps {
-  flex: 1 1 42%;
-  padding: 18vh 0 18vh 2.5rem;
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 4vh 0 6vh;
 }
 .step {
-  min-height: 72vh;
+  min-height: 60vh;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  margin-bottom: 6vh;
+  justify-content: flex-start;
+  margin-bottom: 5vh;
+  padding-top: 4vh;
 }
 .step__card {
   background: var(--paper-2);
@@ -367,20 +369,8 @@ footer .credits { max-width: 760px; margin: 0 auto; }
 /* ---------- RESPONSIVE ---------- */
 @media (max-width: 900px) {
   .stat-strip { grid-template-columns: repeat(2, 1fr); }
-  #scrolly { flex-direction: column; }
-  .scrolly__graphic {
-    position: sticky;
-    top: 0;
-    height: 56vh;
-    flex-basis: auto;
-    width: 100%;
-    z-index: 10;
-    background: var(--paper);
-    padding-top: 0.5rem;
-  }
-  .graphic-card { height: 52vh; }
-  .scrolly__steps { padding: 2vh 0; flex-basis: auto; }
-  .step { min-height: 60vh; }
+  .scrolly__graphic { height: 70vh; min-height: 420px; }
+  .step { min-height: 50vh; padding-top: 3vh; }
   .step__card { margin: 0 0.2rem; }
   .refs { columns: 1; }
   .chain .arrow { transform: rotate(90deg); }

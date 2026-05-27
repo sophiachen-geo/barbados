@@ -503,7 +503,9 @@
   function setLegend(html) {
     if (legend) { map.removeControl(legend); legend = null; }
     if (!html) return;
-    legend = L.control({ position: "bottomright" });
+    // Top-right of the left map so it stacks below the picker and cannot
+    // collide with the time scrubber that lives in the bottom-left.
+    legend = L.control({ position: "topright" });
     legend.onAdd = function () {
       var div = L.DomUtil.create("div", "legend");
       div.innerHTML = html;

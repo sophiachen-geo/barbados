@@ -242,6 +242,140 @@
         </div>
       </div>
 
+      <!-- ============ RASTER WALKTHROUGH (v8 outputs) ============ -->
+
+      <div class="step" data-graphic="map" data-view="raster_class_1984_92">
+        <div class="step__card">
+          <span class="num-tag">11 &middot; Baseline · 1984-92</span>
+          <h3>Before the boom</h3>
+          <p>
+            The earliest Landsat 5 epoch. Sugarcane dominates the central plain, natural vegetation
+            holds the steep east and north, and built area is largely confined to Bridgetown and
+            scattered coastal villages. This is the pre-leisuring landscape against which everything
+            after gets measured.
+          </p>
+          <p class="byline" style="font-size:.78rem;opacity:.7;margin-top:.6rem;">
+            v8c classifier · 30 m Landsat composite · 5 classes
+          </p>
+        </div>
+      </div>
+
+      <div class="step" data-graphic="map" data-view="raster_class_2002_10">
+        <div class="step__card">
+          <span class="num-tag">12 &middot; Mid-period · 2002-10</span>
+          <h3>The tourism real-estate boom registers in the pixels</h3>
+          <p>
+            By the 2000s, gated villa enclaves and resort fairways have replaced cropland along the
+            West Coast. Compare this layer to step 11 and the shift is unmistakable on the Platinum
+            Coast strip from Holetown north.
+          </p>
+        </div>
+      </div>
+
+      <div class="step" data-graphic="map" data-view="raster_class_2019_25">
+        <div class="step__card">
+          <span class="num-tag">13 &middot; Welcome-Stamp era · 2019-25</span>
+          <h3>The current map &mdash; and a serious caveat</h3>
+          <p>
+            The most recent v8c classification. Cross-validation flagged that the 30 m Landsat
+            classifier achieves only <strong>18.6&#37; accuracy in St James</strong> (kappa 0.03)
+            &mdash; the exact parish this entire project hinges on. The next step shows the 10 m
+            Sentinel-2 alternative that we use as a sanity check.
+          </p>
+          <p><a href="methods.html#cv" style="color:#a51d0e;font-weight:600;">See the parish CV table &rarr;</a></p>
+        </div>
+      </div>
+
+      <div class="step" data-graphic="map" data-view="raster_class_10m_v8f">
+        <div class="step__card">
+          <span class="num-tag">14 &middot; Cross-check · 10 m Sentinel-2</span>
+          <h3>Fine-resolution sanity check</h3>
+          <p>
+            Same 5-class scheme, but built from 10 m Sentinel-2 instead of 30 m Landsat. The increased
+            resolution shows individual hotel footprints, road widths, and the sharp boundaries between
+            villa lots &mdash; especially useful in St James, where the v8c Landsat classifier is
+            unreliable.
+          </p>
+        </div>
+      </div>
+
+      <div class="step" data-graphic="map" data-view="raster_became_urban">
+        <div class="step__card">
+          <span class="num-tag">15 &middot; What became urban</span>
+          <h3>The 1984-2025 conversion map</h3>
+          <p>
+            Red pixels are land that was anything <em>but</em> built in 1984-92 and is built today.
+            The pattern is a coastal arc: dense along the West Coast, lighter on the South Coast,
+            and almost nothing on the wilder east. This is the single rastor that most directly
+            evidences <em>real estate-driven</em> urbanisation.
+          </p>
+        </div>
+      </div>
+
+      <div class="step" data-graphic="map" data-view="raster_sugarcane_conv">
+        <div class="step__card">
+          <span class="num-tag">16 &middot; Where the sugar went</span>
+          <h3>Sugarcane &rarr; built, vegetation, or other</h3>
+          <p>
+            Barbados had over 30,000 hectares under sugarcane at independence; today it's under 4,000.
+            This layer shows what each former-sugarcane pixel became. The red &ldquo;to built&rdquo; class
+            concentrated along the West Coast is the spatial signature of plantation land being sold
+            for tourism real estate.
+          </p>
+        </div>
+      </div>
+
+      <div class="step" data-graphic="map" data-view="raster_manicuring_10m">
+        <div class="step__card">
+          <span class="num-tag">17 &middot; The golf-and-resort fingerprint</span>
+          <h3>Manicured vegetation index, 10 m</h3>
+          <p>
+            High values (deep green) are heavily-managed turf &mdash; golf-course fairways, resort
+            lawns, hotel grounds. The index uses seasonal phenology (mowed grass has a flat seasonal
+            signal that natural and crop vegetation don't). Sandy Lane, Apes Hill, Royal Westmoreland
+            and the Sandals fairways all light up clearly here.
+          </p>
+        </div>
+      </div>
+
+      <div class="step" data-graphic="map" data-view="raster_ndvi_trend">
+        <div class="step__card">
+          <span class="num-tag">18 &middot; Greening or browning?</span>
+          <h3>NDVI trend per year, 2017-2024</h3>
+          <p>
+            Red = vegetation cover is decreasing year on year (loss of green space). Green = increasing.
+            The West Coast and the densifying suburban ring around Bridgetown show consistent browning.
+            This is the most direct &ldquo;loss of green space&rdquo; layer in the entire stack.
+          </p>
+        </div>
+      </div>
+
+      <div class="step" data-graphic="map" data-view="raster_ccdc_firstbreak">
+        <div class="step__card">
+          <span class="num-tag">19 &middot; When the change happened</span>
+          <h3>CCDC: year of first detected change</h3>
+          <p>
+            Each pixel is coloured by the year a continuous-change-detection algorithm first registered
+            a real disturbance. Purple = decades ago (1990s sugar decline), yellow = recent
+            (Welcome-Stamp era construction). Pairs naturally with the AMI incidence trend on the
+            health side: both intensify in the 2010s.
+          </p>
+        </div>
+      </div>
+
+      <div class="step" data-graphic="map" data-view="raster_disagreement">
+        <div class="step__card">
+          <span class="num-tag">20 &middot; Where the classifiers disagree</span>
+          <h3>Reliability map</h3>
+          <p>
+            Five separate classifiers vote per pixel. This layer shows the disagreement count &mdash;
+            high values are pixels where the methods don't agree, and any per-pixel statistic should
+            be treated with care. Read this layer alongside the parish cross-validation table on the
+            <a href="methods.html">methods page</a>.
+          </p>
+        </div>
+      </div>
+
     </div>
   </section>
 

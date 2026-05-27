@@ -68,6 +68,118 @@
   var legend = null;
   var obsData = null;
 
+  // ---------- Raster overlay manager (v8 GEE PNGs) ----------
+  var rasterManager = {
+    manifest: [],
+    layers: {},        // id -> L.imageOverlay
+    activeId: null,
+
+    load: function () {
+      return fetch("data/remote_sensing/layers.json").then(function (r) {
+        if (!r.ok) throw new Error("Could not load layers.json (" + r.status + ")");
+        return r.json();
+      }).then(function (m) {
+        rasterManager.manifest = m;
+        return m;
+      });
+    },
+    entry: function (id) {
+      for (var i = 0; i < this.manifest.length; i++) {
+        if (this.manifest[i].id === id) return this.manifest[i];
+      }
+      return null;
+    },
+    _ensure: function (id) {
+      if (this.layers[id]) return this.layers[id];
+      var e = this.entry(id);
+      if (!e) return null;
+      this.layers[id] = L.imageOverlay(e.png, e.bounds, {
+        opacity: 0.85, interactive: false, className: "v8-raster"
+      });
+      return this.layers[id];
+    },
+    show: function (id) {
+      var lyr = this._ensure(id);
+      if (!lyr) return;
+      if (!map.hasLayer(lyr)) lyr.addTo(map);
+      // Keep parishes / corridor on top
+      if (parishLayer && map.hasLayer(parishLayer)) parishLayer.bringToFront();
+      if (corridorLayer && map.hasLayer(corridorLayer)) corridorLayer.bringToFront();
+      this.activeId = id;
+    },
+    hide: function (id) {
+      var lyr = this.layers[id];
+      if (lyr && map.hasLayer(lyr)) map.removeLayer(lyr);
+      if (this.activeId === id) this.activeId = null;
+    },
+    solo: function (id) {
+      var self = this;
+      Object.keys(this.layers).forEach(function (other) {
+        if (other !== id) self.hide(other);
+      });
+      this.show(id);
+    },
+    hideAll: function () {
+      var self = this;
+      Object.keys(this.layers).forEach(function (id) { self.hide(id); });
+    }
+  };
+
+  function rasterLegendHTML(entry) {
+    if (!entry) return null;
+    var rows = (entry.legend || []).map(function (L) {
+      return '<i style="background:' + L.hex + '"></i>' + L.label;
+    }).join("<br>");
+    return '<h4>' + entry.title + '</h4>' +
+      '<p style="margin:0 0 .35rem;font-size:.75rem;opacity:.8">' + entry.desc + '</p>' +
+      rows;
+  }
+
+  function showRasterView(id) {
+    var entry = rasterManager.entry(id);
+    if (!entry) return;
+    // Use satellite imagery as base so the raster's classes overlay terrain context
+    ensureBase(imagery);
+    removeIf(corridorLayer);
+    removeIf(obsLayer);
+    resetParishStyle();
+    addIf(parishLayer);
+    rasterManager.solo(id);
+    setLegend(rasterLegendHTML(entry));
+    // Fit to whatever extent: if WestCoast layer (NDVI 10m / manicuring) tight in, else island
+    var bounds = L.latLngBounds(entry.bounds);
+    map.flyToBounds(bounds, { duration: 1.0, padding: [10, 10] });
+  }
+
+  // ---------- Raster picker control (always-visible dropdown) ----------
+  function buildRasterPicker() {
+    var ctrl = L.control({ position: "topright" });
+    ctrl.onAdd = function () {
+      var div = L.DomUtil.create("div", "raster-picker");
+      var options = '<option value="">Pick a v8 raster…</option>';
+      rasterManager.manifest.forEach(function (e) {
+        options += '<option value="' + e.id + '">' + e.title + '</option>';
+      });
+      div.innerHTML =
+        '<label style="display:block;font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:#5b5749;margin-bottom:.25rem;">Raster overlay</label>' +
+        '<select class="raster-picker__select">' + options + '</select>' +
+        '<button class="raster-picker__clear" type="button" title="Hide overlay">&times;</button>';
+      var sel = div.querySelector(".raster-picker__select");
+      var clr = div.querySelector(".raster-picker__clear");
+      L.DomEvent.disableClickPropagation(div);
+      L.DomEvent.on(sel, "change", function () {
+        if (sel.value) showRasterView(sel.value);
+      });
+      L.DomEvent.on(clr, "click", function () {
+        sel.value = "";
+        rasterManager.hideAll();
+        setLegend(null);
+      });
+      return div;
+    };
+    ctrl.addTo(map);
+  }
+
   // ---------- Styling helpers ----------
   function parishStyleBase(feature) {
     var west = WEST_PARISHES.indexOf(feature.properties.shapeName) !== -1;
@@ -232,6 +344,10 @@
   function showMap(view) {
     chartPanel.classList.remove("is-visible");
     badge.textContent = BADGES[view] || "Map";
+    // Any non-raster view should hide the overlays
+    if (!(view && view.indexOf("raster_") === 0)) {
+      rasterManager.hideAll();
+    }
     if (views[view]) views[view]();
     // Leaflet needs a nudge after the sticky container settles.
     window.setTimeout(function () { map.invalidateSize(); }, 200);
@@ -265,11 +381,25 @@
   // ---------- Boot ----------
   Promise.all([
     fetch("data/gis/barbados_parishes.geojson").then(function (r) { return r.json(); }),
-    fetch("data/field/field_observations.geojson").then(function (r) { return r.json(); })
+    fetch("data/field/field_observations.geojson").then(function (r) { return r.json(); }),
+    rasterManager.load().catch(function (e) {
+      console.warn("Raster manifest unavailable:", e.message);
+      return [];
+    })
   ]).then(function (res) {
     buildParishLayer(res[0]);
     obsData = res[1];
     buildObsLayer(res[1]);
+
+    // Register a raster view per manifest entry so steps can declare
+    // data-view="raster_<id>" and the existing scroller picks them up.
+    rasterManager.manifest.forEach(function (e) {
+      views["raster_" + e.id] = function () { showRasterView(e.id); };
+      BADGES["raster_" + e.id] = "Raster · " + e.title;
+    });
+
+    if (rasterManager.manifest.length) buildRasterPicker();
+
     views.overview();
     initScroller();
     window.setTimeout(function () { map.invalidateSize(); }, 300);

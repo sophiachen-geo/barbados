@@ -389,3 +389,63 @@ footer .credits { max-width: 760px; margin: 0 auto; }
   body { font-size: 16px; }
   .hero { padding: 6vh 6vw; }
 }
+
+/* ---------- RASTER PICKER (v8 overlays) ---------- */
+.raster-picker {
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid var(--sand, #c8b896);
+  border-radius: 6px;
+  padding: 0.5rem 0.6rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+  font-family: inherit;
+  max-width: 240px;
+}
+.raster-picker__select {
+  width: calc(100% - 22px);
+  font-size: 0.82rem;
+  padding: 4px 6px;
+  border: 1px solid #d6cdb7;
+  border-radius: 4px;
+  background: #fff;
+  cursor: pointer;
+}
+.raster-picker__clear {
+  background: transparent;
+  border: 1px solid #d6cdb7;
+  border-radius: 4px;
+  width: 22px;
+  height: 22px;
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+  color: #5b5749;
+  margin-left: 2px;
+  vertical-align: middle;
+}
+.raster-picker__clear:hover { background: #fdebe8; color: #a51d0e; border-color: #a51d0e; }
+
+/* Make the legend a touch bigger when showing raster details */
+.legend {
+  max-width: 240px;
+  font-size: 0.78rem;
+  line-height: 1.4;
+  background: rgba(255, 255, 255, 0.96);
+  padding: 0.6rem 0.75rem;
+  border: 1px solid #d6cdb7;
+  border-radius: 6px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+}
+.legend h4 { margin: 0 0 .4rem; font-size: 0.85rem; }
+.legend i {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  margin-right: 6px;
+  vertical-align: middle;
+  border: 1px solid rgba(0, 0, 0, 0.18);
+}
+
+/* The raster image overlay itself — slightly crisp rendering */
+.v8-raster {
+  image-rendering: pixelated;   /* show class boundaries cleanly */
+}

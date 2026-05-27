@@ -1,0 +1,57 @@
+cohort,year,source,risk_factor,prevalence_pct,sex,age_group,notes
+adults_25plus,2012-2013,HoTNS,any_risk_factor,80,male,25+,8 in 10 men
+adults_25plus,2012-2013,HoTNS,any_risk_factor,90,female,25+,9 in 10 women
+adults_25plus,2012-2013,HoTNS,overweight_or_obese,67,both,25+,2 of every 3 adults
+adults_25plus,2012-2013,HoTNS,bmi_35plus_gross_obesity,10,female,25+,about 1 in 10 women
+adults_25plus,2012-2013,HoTNS,bmi_35plus_gross_obesity,5,male,25+,almost 1 in 20 men
+adults_25plus,2012-2013,HoTNS,daily_tobacco_use,10,male,25+,1 in 10 men
+adults_25plus,2012-2013,HoTNS,daily_tobacco_use,2,female,25+,1 in 50 women
+hospitalised_stroke,2014,NCD_Plan,hypertension,89,both,all,QEH admitted stroke patients
+hospitalised_stroke,2014,NCD_Plan,diabetes,72,both,all,QEH admitted stroke patients
+hospitalised_stroke,2014,NCD_Plan,high_cholesterol,67,both,all,QEH admitted stroke patients
+hospitalised_stroke,2014,NCD_Plan,obesity,39,both,all,QEH admitted stroke patients
+hospitalised_ami,2014,NCD_Plan,hypertension,86,both,all,QEH admitted AMI patients
+hospitalised_ami,2014,NCD_Plan,obesity,86,both,all,QEH admitted AMI patients
+hospitalised_ami,2014,NCD_Plan,diabetes,80,both,all,QEH admitted AMI patients
+hospitalised_ami,2014,NCD_Plan,high_cholesterol,76,both,all,QEH admitted AMI patients
+hospitalised_ami,2022,BNR_CVD_2024,hypertension,65,both,all,N=207 fully abstracted
+hospitalised_ami,2022,BNR_CVD_2024,diabetes,47,both,all,N=207 fully abstracted
+hospitalised_ami,2022,BNR_CVD_2024,alcohol_use,18,both,all,N=207 fully abstracted
+hospitalised_ami,2022,BNR_CVD_2024,smoking,10,both,all,N=207 fully abstracted
+hospitalised_ami,2022,BNR_CVD_2024,prior_acute_mi,14,both,all,N=207 fully abstracted
+hospitalised_ami,2022,BNR_CVD_2024,prior_stroke,12,both,all,N=207 fully abstracted
+hospitalised_stroke,2022,BNR_CVD_2024,hypertension,73,both,all,N=494 fully abstracted
+hospitalised_stroke,2022,BNR_CVD_2024,diabetes,36,both,all,N=494 fully abstracted
+hospitalised_stroke,2022,BNR_CVD_2024,alcohol_use,17,both,all,N=494 fully abstracted
+hospitalised_stroke,2022,BNR_CVD_2024,smoking,7,both,all,N=494 fully abstracted
+hospitalised_stroke,2022,BNR_CVD_2024,prior_stroke_or_tia,23,both,all,N=494 fully abstracted
+hospitalised_stroke,2022,BNR_CVD_2024,family_history_stroke,4,both,all,Denominator 494
+students_13_15,2011,GSHS,overweight,31.9,both,13-15,
+students_13_15,2011,GSHS,overweight,32.1,male,13-15,
+students_13_15,2011,GSHS,overweight,31.8,female,13-15,
+students_13_15,2011,GSHS,obese,14.2,both,13-15,
+students_13_15,2011,GSHS,obese,13.9,male,13-15,
+students_13_15,2011,GSHS,obese,14.6,female,13-15,
+students_13_15,2011,GSHS,physically_active_60min_5days_per_week,29.1,both,13-15,Direct built-environment indicator
+students_13_15,2011,GSHS,physically_active_60min_5days_per_week,34.5,male,13-15,
+students_13_15,2011,GSHS,physically_active_60min_5days_per_week,23.3,female,13-15,
+students_13_15,2011,GSHS,sedentary_3plus_hours_per_day,64.9,both,13-15,
+students_13_15,2011,GSHS,sedentary_3plus_hours_per_day,60.4,male,13-15,
+students_13_15,2011,GSHS,sedentary_3plus_hours_per_day,69.6,female,13-15,
+students_13_15,2011,GSHS,carbonated_soft_drink_daily,73.3,both,13-15,
+students_13_15,2011,GSHS,alcohol_past_30_days,46.9,both,13-15,
+students_13_15,2013,GYTS,any_tobacco_use,14.5,both,13-15,
+students_13_15,2013,GYTS,current_tobacco_smoking,12.6,both,13-15,
+students_13_15,2013,GYTS,current_cigarette_smoking,7.0,both,13-15,
+students_13_15,2013,GYTS,exposed_tobacco_smoke_at_home,19.1,both,13-15,
+all_deaths,2010-2012,NCD_Plan,ihd_htn_stroke_dm_combined_share,25,male,all,Of all male deaths
+all_deaths,2010-2012,NCD_Plan,ihd_htn_stroke_dm_combined_share,33,female,all,Of all female deaths
+all_deaths,2016,WHO,ncd_share_of_all_deaths,83,both,all,
+all_deaths,2016,WHO,cvd_share_of_all_deaths,29,both,all,
+all_deaths,2016,WHO,cancer_share_of_all_deaths,23,both,all,
+all_deaths,2016,WHO,diabetes_share_of_all_deaths,9,both,all,
+all_deaths,2016,WHO,chronic_respiratory_share_of_all_deaths,4,both,all,
+all_deaths,2016,WHO,other_ncds_share_of_all_deaths,18,both,all,
+all_deaths,2016,WHO,premature_mortality_risk_from_ncds,16,both,30-70,
+all_deaths,2016,WHO,premature_mortality_risk_from_ncds,20,male,30-70,
+all_deaths,2016,WHO,premature_mortality_risk_from_ncds,13,female,30-70,

@@ -1,0 +1,172 @@
+{
+  "type": "FeatureCollection",
+  "metadata": {
+    "source": "Chen & Ejov field work, Barbados West Coast, March 1-7 2020",
+    "note": "Coordinates are approximate, geocoded from place names in the field log. Refine with GPS tracks when available.",
+    "issues_legend": {
+      "1": "Competition for land: agriculture vs real estate tourism",
+      "2": "Foreign residents as clients: preferences override local sustainability/equity",
+      "3": "Inequity in resource and service distribution (water, sewage)",
+      "4": "Real estate speculation: segregation, vacancy alongside unmet demand",
+      "5": "Erosion of Barbadian identity: aesthetics, social values, preservation"
+    }
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [-59.6383, 13.1905] },
+      "properties": {
+        "date": "March 1",
+        "place": "St James' Parish Church, Holetown",
+        "parish": "Saint James",
+        "issues": [5],
+        "category": "public space / community",
+        "note": "First Sunday in Lent service, ~90% full, mixed ethnicities, average age 50-60. Sermon linked care for nature to faith. Program offered 'a very special welcome to all of our visitors, especially those from overseas.' Church is the one space frequented equally by locals and tourists."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [-59.5247, 13.2148] },
+      "properties": {
+        "date": "March 1",
+        "place": "Beach near Bathsheba Park, St Joseph (East coast)",
+        "parish": "Saint Joseph",
+        "issues": [3],
+        "category": "water / sewage inequity",
+        "note": "Talked with cruise tourists making short stops. East coast gets more cruise day-trippers; West coast gets longer stayovers. Beaches full of rocks and algae; a large hole exposed raw sewage on the beach. No raw sewage was ever seen on the West Coast. Unpaved rocky roads and traditional houses inland. Eco Rebel community bins advocating veg-ware over single-use plastic."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [-59.6418, 13.1872] },
+      "properties": {
+        "date": "March 5",
+        "place": "Farmer's house near Porters Road, opposite Colony Beach Club, Holetown",
+        "parish": "Saint James",
+        "issues": [1, 2],
+        "category": "agriculture vs tourism land",
+        "note": "Across from the most luxurious hotels on the Platinum Coast. Bought fresh eggs (BBD$4/half-dozen). Backyard densely planted with vegetables and fruit; farmer washes and reuses plastic bags; ~100 chickens caged, guard dogs caged. 'Land is scarce here, chickens can't run free.'"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [-59.6379, 13.1918] },
+      "properties": {
+        "date": "March 5",
+        "place": "Altman real estate, Limegrove Lifestyle Centre, Holetown",
+        "parish": "Saint James",
+        "issues": [4],
+        "category": "real estate market",
+        "note": "Market is segmented: older British/Canadian/European buyers on the West Coast (larger houses); younger American/Caribbean buyers on the South Coast (smaller, near capital and airport). Many buy to rent out (long-term, AirBnB, holiday). West Coast firms cater almost solely to the luxury villa market. Same houses listed across many cooperating agencies."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [-59.6410, 13.1962] },
+      "properties": {
+        "date": "March 5-6",
+        "place": "Sotheby's, Porters",
+        "parish": "Saint James",
+        "issues": [4, 5],
+        "category": "real estate market",
+        "note": "Holetown sold as 'community' / New Urbanism akin to North American suburbs. Clear division between Bridgetown real estate and Platinum Coast real estate ('ghettoization'); buyer age and nationality set the tier. Trend toward smaller plots, less individualized houses, fewer communal spaces, building higher uphill. Easy to move money in via an offshore company in St Lucy."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [-59.6432, 13.1840] },
+      "properties": {
+        "date": "March 5",
+        "place": "Residences on the Platinum Coast (Sandpiper, Coral Reef, Colony Club, Heron Bay)",
+        "parish": "Saint James",
+        "issues": [2, 3, 4],
+        "category": "public space / access",
+        "note": "Walked freely into Sandpiper, Coral Reef and Colony Club hotels with no one checking identity, but Heron Bay next door is camera-guarded with manager-only parking. Cul-de-sacs around Villa des Anges hold long-established gated luxury homes of overseas families (e.g. the Sixt family of Sixt Rent a Car). A house by a memorial sculpture sits dangerously close to the eroding shore: nets and warning tape hold the terrace together."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [-59.6427, 13.1845] },
+      "properties": {
+        "date": "March 5",
+        "place": "Climate adaptation works near Colony Club",
+        "parish": "Saint James",
+        "issues": [3],
+        "category": "remote-sensing / coastal change",
+        "note": "Roadside panel on coastal climate-change adaptation measures. Funders named include USAID; consultant named is Baird (a Canadian firm) - illustrates reliance on foreign capital and expertise."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [-59.6420, 13.1935] },
+      "properties": {
+        "date": "March 6",
+        "place": "Mango Drive / Glitter Bay (Porters), abandoned restaurant & Ince Walk",
+        "parish": "Saint James",
+        "issues": [4],
+        "category": "vacancy / speculation",
+        "note": "Hotels with extensive freshly-watered lawns near the coast; lesser duplexes and summer houses inland, some vacant with knee-high grass. A gardener explained an abandoned house (former restaurant) and surrounding properties are owned by foreign tourists absent for months or years. One street from the abandoned house: newer mansions on Ince Walk - prestige varies street to street."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [-59.6105, 13.2052] },
+      "properties": {
+        "date": "March 6",
+        "place": "Royal Westmoreland",
+        "parish": "Saint James",
+        "issues": [4, 5],
+        "category": "gated community",
+        "note": "Older, very British estate; buildings oriented to wind; colonial-Caribbean landscaping; membership centred on golf plus valet and services, extremely expensive. Belonging to the 'Royal Westmoreland' name matters as much as the house. Best houses are uphill with views. Large 3-4+ bedroom houses on generous plots, often multigenerational with a guesthouse/gazebo; servant quarters separated as in colonial houses. Selling 'privacy' and 'the ideal Caribbean home experience.'"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [-59.6270, 13.2072] },
+      "properties": {
+        "date": "March 6",
+        "place": "Sugar Hill",
+        "parish": "Saint James",
+        "issues": [4],
+        "category": "gated community",
+        "note": "Considered less prestigious and younger than Royal Westmoreland; similar amenities in simplified form (clubhouse pool, restaurant, concierge, gym, tennis - no golf). A 5-bed villa 'Half Way Tree' listed at US$2.5M with ~US$120K/year running costs (utilities, fees, management, housekeeping, gardening, land tax, insurance) - a heavy burden for owners."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [-59.6432, 13.2503] },
+      "properties": {
+        "date": "March 6",
+        "place": "Speightstown",
+        "parish": "Saint Peter",
+        "issues": [4, 5],
+        "category": "heritage / public space",
+        "note": "Mostly commercial with street vendors; free Arlington Museum; National Trust Open House program (Jan-Mar). Slower rhythm; non-Black people and tourists concentrate at a few coffee shops and the beach. Chattel houses and traditional homes with Guyana windows. A hair-salon owner walked us from the 'local' to the 'foreign' part of town, split by a highway; overseas Bajans and global buyers (incl. 'a bunch of Russians') own the prestige foreign quarter. Cobblers Cove read as the most Bajan-styled luxury hotel; Speightstown hotels boom as Holetown saturates."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [-59.6155, 13.2058] },
+      "properties": {
+        "date": "March 7",
+        "place": "Westmoreland (new development)",
+        "parish": "Saint James",
+        "issues": [1, 2, 5],
+        "category": "land use change / 'green' branding",
+        "note": "Geared to a younger crowd: much smaller plots, almost no backyard or garden, 'Californian' style, maximizing built footprint. A single plot can be split into two houses - 'absolutely no regulation.' No clubhouse; minimal management; imported materials (Chinese ceramic floors). Rocks and trees removed because 'most property owners think the rocks are ugly,' replaced with smaller ornamentals; some flowers imported on demand. Built on a steep slope with erosion/security concerns that neither manager nor agent took seriously. Branded as a 'sustainable, green project' to lift sale prices."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [-59.6170, 13.0972] },
+      "properties": {
+        "date": "varied",
+        "place": "Bridgetown",
+        "parish": "Saint Michael",
+        "issues": [3, 5],
+        "category": "public space / mobility",
+        "note": "Library, bookstore, port; observed inner-city rebranding and revitalization. Hard to navigate Barbados without a car: two parallel transit tracks (public and private); those without a car face limited opportunity - physical immobility becoming social immobility."
+      }
+    }
+  ]
+}

@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Real Estate Tourism, Land Use & Health on Barbados's West Coast</title>
+  <meta name="description" content="An interactive look at how real estate tourism, land-use change, loss of public space, and health outcomes are connected on the West Coast of Barbados. Field observation, GIS, remote sensing, and health data." />
+
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <!-- ============ HERO ============ -->
+  <header class="hero">
+    <div class="hero__inner">
+      <p class="eyebrow">Barbados &middot; West Coast &middot; A Spatial Snapshot</p>
+      <h1>Selling Paradise, Spending Health</h1>
+      <p class="lede">
+        On Barbados's Platinum Coast, real estate tourism is reshaping the land &mdash; turning
+        plantations and open ground into gated villas and golf greens. This is a story about how that
+        transformation is connected to land-use change, the loss of public and green space, and the
+        island's rising burden of cardiovascular disease.
+      </p>
+      <p class="byline">
+        A research project by <strong>Sophia Chen</strong> and <strong>Anastasia Ejov</strong><br />
+        Integrating field observation, GIS, remote sensing, and health-outcomes data.
+      </p>
+    </div>
+    <div class="scroll-cue">Scroll to explore<span>&#8595;</span></div>
+  </header>
+
+  <!-- ============ KEY-STAT STRIP ============ -->
+  <section class="stat-strip" aria-label="Headline figures">
+    <div class="stat"><div class="num">+55%</div><div class="lab">Heart-attack (AMI) cases, 2013&ndash;2020</div></div>
+    <div class="stat"><div class="num">+81.3%</div><div class="lab">Price premium for a gated property</div></div>
+    <div class="stat"><div class="num">+117.9%</div><div class="lab">Unoccupied properties, 1990&ndash;2010</div></div>
+    <div class="stat"><div class="num">83%</div><div class="lab">Of all deaths are non-communicable diseases</div></div>
+  </section>
+
+  <!-- ============ INTRO BAND ============ -->
+  <div class="band">
+    <p class="kicker">The question</p>
+    <h2>Can the West Coast's real estate market coexist with sustainable, healthy communities?</h2>
+    <p>
+      Barbados is a Small Island Developing State whose sugar economy has, over fifty years, given way
+      to resorts, villas and golf courses &mdash; the &ldquo;leisuring&rdquo; of rural landscapes that converts land from
+      productive to consumptive use. This project pairs a statistical analysis of luxury property
+      listings and a week of field observation with open GIS layers, satellite imagery, and national
+      health data to trace a single thread: <strong>how the supply side of real estate tourism reaches
+      all the way into public space and public health.</strong>
+    </p>
+    <p>
+      The panel on the next screens stays fixed while the story scrolls beside it. Maps pan, zoom and
+      change layers; charts appear where the evidence is in the numbers.
+    </p>
+  </div>
+
+  <!-- ============ SCROLLYTELLING ============ -->
+  <section id="scrolly">
+    <!-- STICKY GRAPHIC -->
+    <div class="scrolly__graphic">
+      <div class="graphic-card">
+        <div class="graphic-badge" id="graphic-badge">Map &middot; Barbados</div>
+        <div id="map"></div>
+
+        <!-- CHART OVERLAY -->
+        <div class="chart-panel" id="chart-panel">
+          <h3 id="chart-title">Chart</h3>
+          <p class="sub" id="chart-sub"></p>
+          <div class="chart-wrap"><canvas id="chart-canvas"></canvas></div>
+          <p class="chart-source" id="chart-source"></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCROLLING STEPS -->
+    <div class="scrolly__steps">
+
+      <div class="step" data-graphic="map" data-view="overview">
+        <div class="step__card">
+          <span class="num-tag">01 &middot; The island</span>
+          <h3>A dense, fragile island economy</h3>
+          <p>
+            Barbados packs a dense population onto 11 parishes with limited resources and revenues that
+            depend on imported goods and foreign visitors. Historic inequities left poor housing and an
+            insecure land-tenure system, producing a <strong>highly uneven distribution of settlement</strong>
+            that still shapes the island today.
+          </p>
+          <p>The eleven parishes shown here are the spatial units that anchor every layer in this analysis.</p>
+        </div>
+      </div>
+
+      <div class="step" data-graphic="map" data-view="westcoast">
+        <div class="step__card">
+          <span class="num-tag">02 &middot; The Platinum Coast</span>
+          <h3>Where global capital meets the shoreline</h3>
+          <p>
+            The West Coast &mdash; St James and St Peter &mdash; is one of the most sought-after real estate
+            tourism locations in the Caribbean. Plantations have become resorts, villas and golf courses,
+            &ldquo;serving and exploiting&rdquo; a growing affluent class.
+          </p>
+          <p class="pull">
+            The 2020 Welcome Stamp lets non-nationals earning over US$50,000 reside tax-free &mdash;
+            the newest of many incentives drawing residential tourism to this coast.
+          </p>
+        </div>
+      </div>
+
+      <div class="step" data-graphic="chart" data-view="regression">
+        <div class="step__card">
+          <span class="num-tag">03 &middot; What the listings say</span>
+          <h3>Pricing privacy and enclosure</h3>
+          <p>
+            A Python scraper pulled <strong>135 listings</strong> from a local luxury portal; a multiple
+            regression model isolated what drives price. The strongest signals are not about the house at
+            all &mdash; they are about <strong>enclosure and exclusivity</strong>.
+          </p>
+          <p>
+            Being inside a gated property adds <strong>+81%</strong> to the price; each extra room adds
+            +25.5%; penthouses and condos command large premiums. The market literally pays for
+            separation from the surrounding community.
+          </p>
+        </div>
+      </div>
+
+      <div class="step" data-graphic="map" data-view="landuse">
+        <div class="step__card">
+          <span class="num-tag">04 &middot; Leisuring of the land</span>
+          <h3>From productive ground to consumptive amenity</h3>
+          <p>
+            Switch to satellite imagery and the West Coast corridor reads as near-continuous built-up
+            development hugging the shore. Agricultural land &mdash; Barbados is self-sufficient only in
+            chicken &mdash; has been converted to golf and polo, while new projects climb
+            <strong>higher and higher uphill</strong> on steep, erosion-prone slopes.
+          </p>
+          <p>
+            A satellite land-cover-change layer (1984&rarr;2020 Landsat / recent Sentinel-2) drops in here
+            once classified; the highlighted corridor marks where that expansion concentrates.
+          </p>
+        </div>
+      </div>
+
+      <div class="step" data-graphic="map" data-view="publicspace">
+        <div class="step__card">
+          <span class="num-tag">05 &middot; The loss of public space</span>
+          <h3>Gates, vacancy, and unequal water</h3>
+          <p>
+            Field visits mapped the texture of enclosure. Some hotels could be walked into freely; others
+            next door were camera-guarded with manager-only access. Foreign-owned homes sit
+            <strong>vacant for months or years</strong> even as locals live in overcrowded households.
+          </p>
+          <p>
+            Resource distribution tilts to the coast: hotels and tourist residences use <strong>three times
+            more water</strong> than locals, 40% of treated water never reaches customers, and raw sewage
+            was seen on the East coast &mdash; never on the West. Click the markers to read each encounter.
+          </p>
+        </div>
+      </div>
+
+      <div class="step" data-graphic="chart" data-view="activity">
+        <div class="step__card">
+          <span class="num-tag">06 &middot; The obesogenic environment</span>
+          <h3>Built to drive, not to move</h3>
+          <p>
+            The same land-use pattern &mdash; sprawl, car dependence, shrinking communal and green space &mdash;
+            is what public-health researchers call an <em>obesogenic environment</em>. The behavioural data
+            are stark: only <strong>29% of 13&ndash;15-year-olds</strong> are active 60 minutes on 5+ days a
+            week, while <strong>65% are sedentary</strong> 3+ hours a day.
+          </p>
+          <p>Navigating Barbados without a car is hard &mdash; physical immobility becomes social immobility.</p>
+        </div>
+      </div>
+
+      <div class="step" data-graphic="chart" data-view="cvd">
+        <div class="step__card">
+          <span class="num-tag">07 &middot; The health signal</span>
+          <h3>Heart attacks are rising; strokes are flat</h3>
+          <p>
+            National registry data tell a sharp story. Between 2013 and 2020, <strong>acute heart-attack
+            (AMI) incidence rose about 55%</strong> &mdash; the same window as the most recent wave of
+            tourism-driven development. Stroke incidence, by contrast, stayed essentially flat.
+          </p>
+          <p>That divergence is the empirical hook tying the built environment to cardiovascular outcomes.</p>
+        </div>
+      </div>
+
+      <div class="step" data-graphic="chart" data-view="riskfactors">
+        <div class="step__card">
+          <span class="num-tag">08 &middot; The mechanism</span>
+          <h3>Hypertension, diabetes, obesity</h3>
+          <p>
+            The pathway runs through well-documented risk factors. Among hospitalised heart-attack
+            patients, <strong>86% had hypertension and 86% were obese</strong>; 8 in 10 men and 9 in 10
+            women carry at least one NCD risk factor; two of every three adults are overweight or obese.
+          </p>
+          <p>
+            Non-communicable diseases now account for <strong>83% of all deaths</strong> and consume
+            <strong>70% of the national hospital budget</strong> &mdash; the public cost of a privatised
+            landscape.
+          </p>
+        </div>
+      </div>
+
+      <div class="step" data-graphic="map" data-view="edjoin">
+        <div class="step__card">
+          <span class="num-tag">09 &middot; The spatial overlap</span>
+          <h3>Bringing disease down to the neighbourhood</h3>
+          <p>
+            The 2010 census records self-reported heart disease, hypertension and diabetes for roughly
+            <strong>600 enumeration districts</strong>, alongside dwelling-vintage cohorts and
+            unoccupied-dwelling counts &mdash; a built-in <em>tourism-pressure index</em>.
+          </p>
+          <p>
+            Joined to the parish polygons shown here (and, once the ED shapefile is obtained, to the finer
+            districts), this lets us test whether the parishes losing the most open land also carry the
+            heaviest chronic-disease burden. The choropleth here is illustrative until your ED layer lands.
+          </p>
+        </div>
+      </div>
+
+      <div class="step" data-graphic="map" data-view="fieldtimeline">
+        <div class="step__card">
+          <span class="num-tag">10 &middot; The field record</span>
+          <h3>One week, a dozen encounters</h3>
+          <p>
+            Every point on this map is a logged observation from March 1&ndash;7: a church that welcomes
+            locals and tourists alike, a farmer selling eggs across from a five-star hotel, gated estates
+            selling &ldquo;the ideal Caribbean home experience,&rdquo; a new hillside project branded &ldquo;green&rdquo; to lift
+            its price.
+          </p>
+          <p>Explore them &mdash; each marker carries the raw note and the issues it speaks to.</p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ SYNTHESIS / PATHWAY ============ -->
+  <section class="pathway" id="synthesis">
+    <h2>Connecting the threads</h2>
+    <p class="sub">How real estate tourism reaches from a property listing to a hospital ward.</p>
+    <div class="chain">
+      <div class="node"><div class="ic">&#127958;</div><h4>Real estate tourism</h4><p>Foreign capital, gated villas, the Welcome Stamp</p></div>
+      <div class="arrow">&#8594;</div>
+      <div class="node"><div class="ic">&#127966;</div><h4>Land-use change</h4><p>Plantations &amp; farmland &rarr; resorts, golf, hillside sprawl</p></div>
+      <div class="arrow">&#8594;</div>
+      <div class="node"><div class="ic">&#128682;</div><h4>Loss of public space</h4><p>Enclosure, vacancy, unequal water &amp; coastal access</p></div>
+      <div class="arrow">&#8594;</div>
+      <div class="node"><div class="ic">&#128694;</div><h4>Obesogenic environment</h4><p>Car dependence, low activity, less green &amp; communal space</p></div>
+      <div class="arrow">&#8594;</div>
+      <div class="node"><div class="ic">&#10084;</div><h4>Rising CVD</h4><p>Hypertension, obesity &rarr; +55% heart-attack incidence</p></div>
+    </div>
+
+    <div class="finding">
+      <p class="kicker">The finding this project is built to defend</p>
+      <p>
+        As tourism-driven development converted West-Coast land from open and agricultural to built-up
+        and enclosed, it hollowed out the public and active spaces that protect health &mdash; and the
+        parishes under the most pressure now sit alongside a steeply rising burden of cardiovascular
+        disease.
+      </p>
+      <p class="caveat">
+        Causal, not yet proven: national CVD trends are temporal, the census disease data are a 2010
+        cross-section, and parish/ED-level incidence must still be requested from the Barbados National
+        Registry. The spatial join below is the test that turns this narrative into evidence.
+      </p>
+    </div>
+  </section>
+
+  <!-- ============ DATA & METHODS ============ -->
+  <section class="section" id="data">
+    <h2>Data &amp; methods</h2>
+    <p class="sub">
+      Four data streams, deliberately integrated. Each card notes the source, how it enters the analysis,
+      and whether the layer is live on this site or awaiting your files.
+    </p>
+    <div class="cards">
+      <div class="data-card">
+        <span class="tag field">Field observation</span>
+        <h3>Week-long field study</h3>
+        <p>Participant observation, informal interviews and a March 1&ndash;7 log across the West Coast, geocoded to map points.</p>
+        <ul>
+          <li>13 logged sites, 5 thematic issues</li>
+          <li>Stakeholder interviews: agents, managers, residents, gardeners</li>
+        </ul>
+        <p class="status ready">&#9679; Live on the map</p>
+      </div>
+      <div class="data-card">
+        <span class="tag field">Real estate listings</span>
+        <h3>7thHeaven scrape + regression</h3>
+        <p>135 listings scraped (12 May 2020); multiple linear regression on log price with stepwise selection.</p>
+        <ul>
+          <li>Gated +81%, per-room +25.5%, penthouse +143%</li>
+          <li>Hill &minus;40%, South Coast &minus;51%</li>
+        </ul>
+        <p class="status ready">&#9679; Live as the regression chart</p>
+      </div>
+      <div class="data-card">
+        <span class="tag health">Health outcomes</span>
+        <h3>CVD registry, NCD plan &amp; census</h3>
+        <p>Barbados National Registry CVD time series (2013&ndash;2022), NCD risk-factor prevalence, and the 2010 census ED disease columns.</p>
+        <ul>
+          <li>AMI +55%; stroke flat (national)</li>
+          <li>2010 census: ~600 EDs with disease + dwelling-vintage counts</li>
+        </ul>
+        <p class="status ready">&#9679; Live as charts; ED join pending shapefile</p>
+      </div>
+      <div class="data-card">
+        <span class="tag gis">GIS</span>
+        <h3>Parishes, parcels &amp; public space</h3>
+        <p>Open parish boundaries (geoBoundaries) power the map now. Drop your parcels, land-use and public-space layers into <code>data/gis/</code>.</p>
+        <ul>
+          <li>11 parish polygons &mdash; live</li>
+          <li>Enumeration-district shapefile &mdash; to obtain from BSS</li>
+        </ul>
+        <p class="status todo">&#9679; Open boundaries live; your layers pending</p>
+      </div>
+      <div class="data-card">
+        <span class="tag rs">Remote sensing</span>
+        <h3>Land-cover change</h3>
+        <p>Esri World Imagery basemap is available as a toggle now. Add classified Landsat (1984&ndash;2020) / Sentinel-2 change layers to <code>data/remote_sensing/</code>.</p>
+        <ul>
+          <li>Satellite basemap &mdash; live</li>
+          <li>Urban-expansion + NDVI / LST rasters &mdash; pending</li>
+        </ul>
+        <p class="status todo">&#9679; Imagery live; change layers pending</p>
+      </div>
+      <div class="data-card">
+        <span class="tag gis">Reproducibility</span>
+        <h3>Open &amp; static</h3>
+        <p>A static site (no build step) deployable straight from GitHub Pages. All data lives in <code>data/</code> with a README describing the expected schema for each layer.</p>
+        <ul>
+          <li>Leaflet + Chart.js, loaded from CDN</li>
+          <li>Swap in real layers without touching the code</li>
+        </ul>
+        <p class="status ready">&#9679; Ready to deploy</p>
+      </div>
+    </div>
+
+    <div class="note-box">
+      <strong>On causation.</strong> This site presents an <em>association and a mechanism</em>, not a proven
+      cause. The land-use&ndash;health pathway it visualises is consistent with the WHO &ldquo;Global Syndemic&rdquo;
+      framing &mdash; which names urban design and land use as drivers of obesity &mdash; but confirming it for
+      Barbados requires sub-national CVD incidence and controls for wealth, age and healthcare access. The
+      analysis is structured to accept exactly those data when they arrive.
+    </div>
+  </section>
+
+  <!-- ============ REFERENCES ============ -->
+  <section class="section" id="references">
+    <h2>References &amp; sources</h2>
+    <p class="sub">Academic literature from the original study, plus the health-data sources integrated here.</p>
+    <ul class="refs">
+      <li>Barrantes-Reynolds, M. P. (2011). The expansion of &ldquo;real estate tourism&rdquo; in coastal areas. <em>RASAALA</em>, 2(1), 51&ndash;70.</li>
+      <li>Belgrave, A., Grosvernor, T., &amp; Lowe, S. (2016). A Framework for Constructing a House Price Index &mdash; A Progress Report.</li>
+      <li>Bunce, M. (2008). The &lsquo;leisuring&rsquo; of rural landscapes in Barbados. <em>Geoforum</em>, 39(2), 969&ndash;979.</li>
+      <li>McHardy, P., &amp; Donovan, M. G. (2016). The State of Social Housing in Six Caribbean Countries.</li>
+      <li>Potter, R. B. (1986). Spatial Inequalities in Barbados, West Indies. <em>Trans. Inst. British Geographers</em>, 11(2), 183&ndash;198.</li>
+      <li>Potter, R. B. (1989). Urban Housing in Barbados, West Indies. <em>The Geographical Journal</em>, 155(1), 81&ndash;93.</li>
+      <li>Sheller, M. (2009). The new Caribbean complexity: Mobility systems, tourism and spatial rescaling. <em>Singapore J. Tropical Geography</em>, 30(2), 189&ndash;203.</li>
+      <li>Wu, H., et al. (2018). Influence Factors and Regression Model of Urban Housing Prices Based on Internet Open Access Data. <em>Sustainability</em>, 10(5).</li>
+      <li>Yusof, A., &amp; Ismail, S. (2012). Multiple Regressions in Analysing House Price Variations. <em>Communications of the IBIMA</em>, 1&ndash;9.</li>
+      <li>Barbados National Registry for Chronic NCDs. CVD Annual Report 2024 (heart attack &amp; stroke time series 2013&ndash;2022).</li>
+      <li>Ministry of Health &amp; Wellness. National Strategic Plan for NCD Prevention &amp; Control 2020&ndash;2025.</li>
+      <li>Barbados Statistical Service. 2010 Population &amp; Housing Census, enumeration-district demographics.</li>
+      <li>HoTNS (2012&ndash;13), GSHS (2011), GYTS (2013), WHO NCD estimates (2016).</li>
+      <li>Boundaries: geoBoundaries (gbOpen) ADM1 for Barbados. Imagery: Esri World Imagery; basemap &copy; OpenStreetMap contributors.</li>
+    </ul>
+  </section>
+
+  <!-- ============ FOOTER ============ -->
+  <footer>
+    <div class="credits">
+      <p>
+        <strong>Real Estate Tourism, Land Use &amp; Health on Barbados's West Coast</strong><br />
+        Sophia Chen &amp; Anastasia Ejov. Built as an open, map-driven scrollytelling publication.
+      </p>
+      <p style="opacity:0.7; font-size:0.8rem;">
+        Field coordinates are approximate. Health associations are exploratory, not causal claims.
+        Data and code in the <code>/data</code> directory of this repository.
+      </p>
+    </div>
+  </footer>
+
+  <!-- ============ SCRIPTS ============ -->
+  <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="js/charts.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>

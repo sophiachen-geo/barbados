@@ -1,0 +1,58 @@
+{
+  "source": "Chen & Ejov, multiple linear regression of 135 real-estate listings scraped from 7thheavenproperties.com (12 May 2020). Dependent variable: listed sale price (USD).",
+  "n_listings": 135,
+  "significance": "p < 0.05, holding all else constant",
+  "model": "Multiple linear regression (log-transformed price), stepwise selection",
+  "coefficients": [
+    {
+      "factor": "Inside a gated property",
+      "effect_pct": 81.3,
+      "direction": "increase",
+      "label": "Gated property: +81.3%"
+    },
+    {
+      "factor": "Penthouse (vs other types)",
+      "effect_pct": 143,
+      "direction": "increase",
+      "label": "Penthouse: +143%"
+    },
+    {
+      "factor": "Condo (vs other types)",
+      "effect_pct": 49,
+      "direction": "increase",
+      "label": "Condo: +49%"
+    },
+    {
+      "factor": "Each additional room (bed + bath combined)",
+      "effect_pct": 25.5,
+      "direction": "increase",
+      "label": "Per extra room: +25.5%"
+    },
+    {
+      "factor": "Located on a hill (vs other locations)",
+      "effect_pct": -40.4,
+      "direction": "decrease",
+      "label": "On a hill: -40.4%"
+    },
+    {
+      "factor": "Located on the South Coast (vs other locations)",
+      "effect_pct": -51.0,
+      "direction": "decrease",
+      "label": "South Coast: -51.0%"
+    }
+  ],
+  "notes": [
+    "Total number of bed + bath rooms combined predicts price better than bedroom count alone.",
+    "Sample is uneven: St James dominates listings; St George has 1, St Thomas and St Philip 2 each; few 'plantation house' or 'estate' types.",
+    "Listed price (not final sale price) and missing floor-area data limit the model; spatial autocorrelation tests (GWR) are a recommended next step.",
+    "Market is segmented by buyer age/nationality: older European buyers favour larger West Coast villas; younger American/Caribbean buyers favour smaller South Coast homes closer to Bridgetown and the airport."
+  ],
+  "hypotheses_tested": [
+    "Price rises with number of rooms (bedrooms + bathrooms).",
+    "Coastal / beach-access properties command the highest prices; the West (Platinum) Coast is most expensive.",
+    "Historically developed coastal parishes (St James, St Michael, Christ Church) cost more than rural parishes.",
+    "Gated properties cost more than non-gated.",
+    "Pool access raises price.",
+    "Property type matters less than room count."
+  ]
+}

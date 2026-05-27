@@ -688,12 +688,21 @@
 
   var lastView = null;
   function activate(stepEl) {
+    // Scrolling NEVER drives the maps. The user controls both viewers via
+    // the picker, the time scrubber, and the planning panel. The
+    // IntersectionObserver still fires so chart steps can render their
+    // inline chart, and so non-chart steps tidy up the chart panel.
     var graphic = stepEl.getAttribute("data-graphic");
     var view = stepEl.getAttribute("data-view");
     if (view === lastView) return;
     lastView = view;
-    if (graphic === "chart") showChart(view, stepEl);
-    else showMap(view);
+    if (graphic === "chart") {
+      showChart(view, stepEl);
+    } else {
+      // Tidy: hide the chart panel so a stale chart never lingers under the
+      // text of a non-chart step.
+      chartPanel.classList.remove("is-visible");
+    }
   }
 
   // ---------- Scroll stepper (IntersectionObserver) ----------

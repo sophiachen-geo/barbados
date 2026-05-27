@@ -1,9 +1,8 @@
 [
   {
     "id": "class_1984_92",
-    "title": "Land cover 1984-1992",
-    "desc": "Earliest Landsat 5 epoch. Establishes the pre-leisuring baseline.",
-    "step": "01",
+    "title": "Land Cover, 1984 to 1992",
+    "desc": "The earliest Landsat 5 epoch. Sugarcane dominates the central plain and built area is largely confined to Bridgetown and a handful of coastal villages.",
     "kind": "categorical",
     "png": "data/remote_sensing/overlays/class_1984_92.png",
     "bounds": [
@@ -18,32 +17,27 @@
     ],
     "legend": [
       {
-        "label": "Water / background",
-        "hex": "#1f3b6b"
-      },
-      {
-        "label": "Natural vegetation",
+        "label": "Natural Vegetation",
         "hex": "#1f7a35"
       },
       {
-        "label": "Sugarcane / cropland",
+        "label": "Sugarcane and Cropland",
         "hex": "#e9c83a"
       },
       {
-        "label": "Manicured / pasture",
+        "label": "Manicured Grass and Pasture",
         "hex": "#a8d97c"
       },
       {
-        "label": "Built / urban",
+        "label": "Built Area",
         "hex": "#d2342f"
       }
     ]
   },
   {
     "id": "class_1993_01",
-    "title": "Land cover 1993-2001",
-    "desc": "Sugar decline era; emergence of golf and resort fairways.",
-    "step": "02",
+    "title": "Land Cover, 1993 to 2001",
+    "desc": "Sugar enters terminal decline. Early golf and resort fairways begin to register as manicured pixels along the western littoral.",
     "kind": "categorical",
     "png": "data/remote_sensing/overlays/class_1993_01.png",
     "bounds": [
@@ -58,32 +52,27 @@
     ],
     "legend": [
       {
-        "label": "Water / background",
-        "hex": "#1f3b6b"
-      },
-      {
-        "label": "Natural vegetation",
+        "label": "Natural Vegetation",
         "hex": "#1f7a35"
       },
       {
-        "label": "Sugarcane / cropland",
+        "label": "Sugarcane and Cropland",
         "hex": "#e9c83a"
       },
       {
-        "label": "Manicured / pasture",
+        "label": "Manicured Grass and Pasture",
         "hex": "#a8d97c"
       },
       {
-        "label": "Built / urban",
+        "label": "Built Area",
         "hex": "#d2342f"
       }
     ]
   },
   {
     "id": "class_2002_10",
-    "title": "Land cover 2002-2010",
-    "desc": "Mid-period: tourism real-estate boom on the West Coast.",
-    "step": "03",
+    "title": "Land Cover, 2002 to 2010",
+    "desc": "The tourism real estate boom registers in pixels. Gated villa enclaves and resort lawns replace cropland on the western coast.",
     "kind": "categorical",
     "png": "data/remote_sensing/overlays/class_2002_10.png",
     "bounds": [
@@ -98,32 +87,27 @@
     ],
     "legend": [
       {
-        "label": "Water / background",
-        "hex": "#1f3b6b"
-      },
-      {
-        "label": "Natural vegetation",
+        "label": "Natural Vegetation",
         "hex": "#1f7a35"
       },
       {
-        "label": "Sugarcane / cropland",
+        "label": "Sugarcane and Cropland",
         "hex": "#e9c83a"
       },
       {
-        "label": "Manicured / pasture",
+        "label": "Manicured Grass and Pasture",
         "hex": "#a8d97c"
       },
       {
-        "label": "Built / urban",
+        "label": "Built Area",
         "hex": "#d2342f"
       }
     ]
   },
   {
     "id": "class_2011_18",
-    "title": "Land cover 2011-2018",
-    "desc": "Densification; villa enclaves multiply.",
-    "step": "04",
+    "title": "Land Cover, 2011 to 2018",
+    "desc": "Densification. Villa enclaves multiply and the manicured signature spreads inland from the original coastal strip.",
     "kind": "categorical",
     "png": "data/remote_sensing/overlays/class_2011_18.png",
     "bounds": [
@@ -138,32 +122,27 @@
     ],
     "legend": [
       {
-        "label": "Water / background",
-        "hex": "#1f3b6b"
-      },
-      {
-        "label": "Natural vegetation",
+        "label": "Natural Vegetation",
         "hex": "#1f7a35"
       },
       {
-        "label": "Sugarcane / cropland",
+        "label": "Sugarcane and Cropland",
         "hex": "#e9c83a"
       },
       {
-        "label": "Manicured / pasture",
+        "label": "Manicured Grass and Pasture",
         "hex": "#a8d97c"
       },
       {
-        "label": "Built / urban",
+        "label": "Built Area",
         "hex": "#d2342f"
       }
     ]
   },
   {
     "id": "class_2019_25",
-    "title": "Land cover 2019-2025",
-    "desc": "Welcome-Stamp era. 10 m Sentinel-2 cross-check recommended in St James.",
-    "step": "05",
+    "title": "Land Cover, 2019 to 2025",
+    "desc": "The most recent classification. Note that the 30 metre Landsat classifier performs poorly in Saint James, so the next layer offers a finer resolution sanity check.",
     "kind": "categorical",
     "png": "data/remote_sensing/overlays/class_2019_25.png",
     "bounds": [
@@ -178,32 +157,27 @@
     ],
     "legend": [
       {
-        "label": "Water / background",
-        "hex": "#1f3b6b"
-      },
-      {
-        "label": "Natural vegetation",
+        "label": "Natural Vegetation",
         "hex": "#1f7a35"
       },
       {
-        "label": "Sugarcane / cropland",
+        "label": "Sugarcane and Cropland",
         "hex": "#e9c83a"
       },
       {
-        "label": "Manicured / pasture",
+        "label": "Manicured Grass and Pasture",
         "hex": "#a8d97c"
       },
       {
-        "label": "Built / urban",
+        "label": "Built Area",
         "hex": "#d2342f"
       }
     ]
   },
   {
     "id": "class_10m_v8f",
-    "title": "Land cover, 10 m Sentinel-2 (recent)",
-    "desc": "Fine-resolution recent classification. Use this as the St James sanity check.",
-    "step": "06",
+    "title": "Land Cover, 10 Metre Sentinel 2",
+    "desc": "The same classification scheme built from 10 metre Sentinel 2 imagery. The increased resolution resolves individual hotel footprints and villa lots, which is particularly useful on the West Coast.",
     "kind": "categorical",
     "png": "data/remote_sensing/overlays/class_10m_v8f.png",
     "bounds": [
@@ -218,32 +192,27 @@
     ],
     "legend": [
       {
-        "label": "Water / background",
-        "hex": "#1f3b6b"
-      },
-      {
-        "label": "Natural vegetation",
+        "label": "Natural Vegetation",
         "hex": "#1f7a35"
       },
       {
-        "label": "Sugarcane / cropland",
+        "label": "Sugarcane and Cropland",
         "hex": "#e9c83a"
       },
       {
-        "label": "Manicured / pasture",
+        "label": "Manicured Grass and Pasture",
         "hex": "#a8d97c"
       },
       {
-        "label": "Built / urban",
+        "label": "Built Area",
         "hex": "#d2342f"
       }
     ]
   },
   {
     "id": "became_urban",
-    "title": "Became urban, 1984-2025",
-    "desc": "Direct binary: red = pixel that was non-urban in 1984-92 and urban by 2019-25.",
-    "step": "07",
+    "title": "Land That Became Urban",
+    "desc": "Red pixels were any class other than built in the 1984 epoch and became built by the 2019 epoch. This is the most direct evidence of real estate driven urbanisation in the entire stack.",
     "kind": "categorical",
     "png": "data/remote_sensing/overlays/became_urban.png",
     "bounds": [
@@ -258,20 +227,15 @@
     ],
     "legend": [
       {
-        "label": "Stable",
-        "hex": "#00000000"
-      },
-      {
-        "label": "Changed",
+        "label": "Changed to Built",
         "hex": "#ff2d00"
       }
     ]
   },
   {
     "id": "sugarcane_conv",
-    "title": "Sugarcane conversion",
-    "desc": "What former sugarcane pixels became.",
-    "step": "08",
+    "title": "Where the Sugarcane Went",
+    "desc": "What former sugarcane pixels became. The red Sugarcane to Built class concentrated along the West Coast is the spatial signature of plantation land sold for tourism real estate.",
     "kind": "categorical",
     "png": "data/remote_sensing/overlays/sugarcane_conv.png",
     "bounds": [
@@ -286,32 +250,27 @@
     ],
     "legend": [
       {
-        "label": "Not sugarcane",
-        "hex": "#00000000"
-      },
-      {
-        "label": "Stayed cropland",
+        "label": "Stayed Cropland",
         "hex": "#a8d97c"
       },
       {
-        "label": "To built",
+        "label": "Sugarcane to Built",
         "hex": "#d2342f"
       },
       {
-        "label": "To natural veg",
+        "label": "Sugarcane to Natural Vegetation",
         "hex": "#1f7a35"
       },
       {
-        "label": "Other transition",
+        "label": "Other Transition",
         "hex": "#e9c83a"
       }
     ]
   },
   {
     "id": "manicuring_10m",
-    "title": "Manicuring index (10 m)",
-    "desc": "High = golf-course / resort lawn / heavily managed vegetation.",
-    "step": "09",
+    "title": "Manicured Vegetation Index, 10 Metre",
+    "desc": "High values pick out heavily managed turf: golf course fairways, resort lawns, hotel grounds. Sandy Lane, Apes Hill, Royal Westmoreland and the Sandals fairways all light up clearly.",
     "kind": "continuous",
     "png": "data/remote_sensing/overlays/manicuring_10m.png",
     "bounds": [
@@ -341,9 +300,8 @@
   },
   {
     "id": "manicuring_30m",
-    "title": "Manicuring index (30 m)",
-    "desc": "Coarser-resolution version for comparison.",
-    "step": "10",
+    "title": "Manicured Vegetation Index, 30 Metre",
+    "desc": "The same index built from coarser Landsat imagery for direct comparison with the Landsat era classifications.",
     "kind": "continuous",
     "png": "data/remote_sensing/overlays/manicuring_30m.png",
     "bounds": [
@@ -373,9 +331,8 @@
   },
   {
     "id": "ndvi_trend",
-    "title": "NDVI trend per year (10 m)",
-    "desc": "Red = browning (vegetation loss), green = greening, 2017-2024.",
-    "step": "11",
+    "title": "NDVI Trend Per Year, 2017 to 2024",
+    "desc": "Red indicates a decline in vegetation cover, green indicates an increase. The West Coast and the densifying suburban ring around Bridgetown show consistent browning.",
     "kind": "continuous",
     "png": "data/remote_sensing/overlays/ndvi_trend.png",
     "bounds": [
@@ -405,9 +362,8 @@
   },
   {
     "id": "ccdc_nbreaks",
-    "title": "CCDC: number of breaks",
-    "desc": "How many times each pixel changed state. High = unstable / repeatedly disturbed.",
-    "step": "12",
+    "title": "Number of Detected Changes",
+    "desc": "How many times each pixel changed state across the full record. High values mark unstable or repeatedly disturbed land such as construction sites and abandonment cycles.",
     "kind": "continuous",
     "png": "data/remote_sensing/overlays/ccdc_nbreaks.png",
     "bounds": [
@@ -437,9 +393,8 @@
   },
   {
     "id": "ccdc_firstbreak",
-    "title": "CCDC: year of first detected change",
-    "desc": "Earlier (purple) = changed long ago; later (yellow) = recent change.",
-    "step": "13",
+    "title": "Year of First Detected Change",
+    "desc": "Each pixel is coloured by the year a continuous change detection algorithm first registered a real disturbance. Purple is long ago, yellow is recent.",
     "kind": "continuous",
     "png": "data/remote_sensing/overlays/ccdc_firstbreak.png",
     "bounds": [
@@ -469,9 +424,8 @@
   },
   {
     "id": "trajectory_bin",
-    "title": "Trajectory (5-bin)",
-    "desc": "Pre-classified trajectory type per pixel (first band shown).",
-    "step": "14",
+    "title": "Trajectory Type, Five Classes",
+    "desc": "A pre classified trajectory type per pixel showing the dominant kind of change that occurred from the 1980s baseline to the present.",
     "kind": "categorical_band1",
     "png": "data/remote_sensing/overlays/trajectory_bin.png",
     "bounds": [
@@ -486,11 +440,7 @@
     ],
     "legend": [
       {
-        "label": "Stable",
-        "hex": "#00000000"
-      },
-      {
-        "label": "Vegetation gain",
+        "label": "Vegetation Gain",
         "hex": "#1f7a35"
       },
       {
@@ -498,20 +448,19 @@
         "hex": "#d2342f"
       },
       {
-        "label": "To cropland",
+        "label": "Converted to Cropland",
         "hex": "#e9c83a"
       },
       {
-        "label": "Other change",
+        "label": "Other Change",
         "hex": "#9966cc"
       }
     ]
   },
   {
     "id": "disagreement",
-    "title": "Multi-method disagreement",
-    "desc": "High = classifiers disagree about this pixel. Treat with caution.",
-    "step": "15",
+    "title": "Classifier Disagreement",
+    "desc": "Five separate classifiers vote on each pixel. High values mark pixels where the methods disagree, and any per pixel statistic should be treated with care there.",
     "kind": "continuous",
     "png": "data/remote_sensing/overlays/disagreement.png",
     "bounds": [
@@ -541,9 +490,8 @@
   },
   {
     "id": "consensus",
-    "title": "5-way classifier consensus",
-    "desc": "Majority-vote class across five classifiers.",
-    "step": "16",
+    "title": "Five Way Classifier Consensus",
+    "desc": "The majority vote class across five separate classifiers.",
     "kind": "categorical",
     "png": "data/remote_sensing/overlays/consensus.png",
     "bounds": [
@@ -558,23 +506,19 @@
     ],
     "legend": [
       {
-        "label": "Water / background",
-        "hex": "#1f3b6b"
-      },
-      {
-        "label": "Natural vegetation",
+        "label": "Natural Vegetation",
         "hex": "#1f7a35"
       },
       {
-        "label": "Sugarcane / cropland",
+        "label": "Sugarcane and Cropland",
         "hex": "#e9c83a"
       },
       {
-        "label": "Manicured / pasture",
+        "label": "Manicured Grass and Pasture",
         "hex": "#a8d97c"
       },
       {
-        "label": "Built / urban",
+        "label": "Built Area",
         "hex": "#d2342f"
       }
     ]

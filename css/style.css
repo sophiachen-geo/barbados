@@ -390,52 +390,67 @@ footer .credits { max-width: 760px; margin: 0 auto; }
   .hero { padding: 6vh 6vw; }
 }
 
-/* ---------- RASTER PICKER (v8 overlays) ---------- */
+/* ---------- RASTER PICKER ---------- */
 .raster-picker {
-  background: rgba(255, 255, 255, 0.96);
-  border: 1px solid var(--sand, #c8b896);
-  border-radius: 6px;
-  padding: 0.5rem 0.6rem;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+  position: relative;
+  background: rgba(255, 255, 255, 0.97);
+  border: 1px solid #d6cdb7;
+  border-radius: 8px;
+  padding: 0.65rem 0.75rem 0.7rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.14);
   font-family: inherit;
-  max-width: 240px;
+  width: 260px;
+}
+.raster-picker__label {
+  display: block;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #5b5749;
+  margin: 0 1.6rem 0.35rem 0;
 }
 .raster-picker__select {
-  width: calc(100% - 22px);
-  font-size: 0.82rem;
-  padding: 4px 6px;
+  display: block;
+  width: 100%;
+  font-size: 0.85rem;
+  padding: 5px 8px;
   border: 1px solid #d6cdb7;
-  border-radius: 4px;
+  border-radius: 5px;
   background: #fff;
   cursor: pointer;
+  color: #2b2820;
 }
+.raster-picker__select:focus { outline: 2px solid #b8a47a; outline-offset: 1px; }
 .raster-picker__clear {
+  position: absolute;
+  top: 4px;
+  right: 6px;
   background: transparent;
-  border: 1px solid #d6cdb7;
-  border-radius: 4px;
+  border: none;
   width: 22px;
   height: 22px;
-  font-size: 14px;
+  font-size: 18px;
   line-height: 1;
   cursor: pointer;
-  color: #5b5749;
-  margin-left: 2px;
-  vertical-align: middle;
+  color: #8a8170;
+  border-radius: 4px;
+  padding: 0;
 }
-.raster-picker__clear:hover { background: #fdebe8; color: #a51d0e; border-color: #a51d0e; }
+.raster-picker__clear:hover { background: #fdebe8; color: #a51d0e; }
 
-/* Make the legend a touch bigger when showing raster details */
+/* Legend (used for both regular layers and raster overlays) */
 .legend {
-  max-width: 240px;
+  max-width: 260px;
   font-size: 0.78rem;
-  line-height: 1.4;
-  background: rgba(255, 255, 255, 0.96);
-  padding: 0.6rem 0.75rem;
+  line-height: 1.45;
+  background: rgba(255, 255, 255, 0.97);
+  padding: 0.7rem 0.85rem;
   border: 1px solid #d6cdb7;
-  border-radius: 6px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.14);
 }
-.legend h4 { margin: 0 0 .4rem; font-size: 0.85rem; }
+.legend h4 { margin: 0 0 .4rem; font-size: 0.88rem; color: #2b2820; }
 .legend i {
   display: inline-block;
   width: 14px;
@@ -445,7 +460,30 @@ footer .credits { max-width: 760px; margin: 0 auto; }
   border: 1px solid rgba(0, 0, 0, 0.18);
 }
 
-/* The raster image overlay itself — slightly crisp rendering */
-.v8-raster {
-  image-rendering: pixelated;   /* show class boundaries cleanly */
+/* Raster overlay rendering */
+.v8-raster { image-rendering: pixelated; }
+
+/* ---------- IMAGE PLACEHOLDERS INSIDE STEP CARDS ---------- */
+.step-image {
+  margin: 0.85rem 0 0;
+  border: 2px dashed #c8b896;
+  border-radius: 8px;
+  background: #fbf6ea;
+  padding: 1.1rem 1rem;
+  text-align: center;
+  font-size: 0.78rem;
+  color: #8a8170;
+  font-style: italic;
+}
+.step-image.has-image { border: none; background: transparent; padding: 0; }
+.step-image img {
+  width: 100%;
+  border-radius: 8px;
+  display: block;
+}
+.step-image figcaption {
+  font-size: 0.72rem;
+  color: #8a8170;
+  margin-top: 0.4rem;
+  font-style: italic;
 }

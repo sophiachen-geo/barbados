@@ -47,7 +47,7 @@
   };
 
   // ---------- Map setup ----------
-  var map = L.map("map", { zoomControl: true, scrollWheelZoom: false, attributionControl: true })
+  var map = L.map("map", { zoomControl: true, scrollWheelZoom: true, attributionControl: true })
     .fitBounds(ISLAND_BOUNDS);
 
   var osm = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
@@ -156,14 +156,14 @@
     var ctrl = L.control({ position: "topright" });
     ctrl.onAdd = function () {
       var div = L.DomUtil.create("div", "raster-picker");
-      var options = '<option value="">Pick a v8 raster…</option>';
+      var options = '<option value="">Pick a Raster Dataset</option>';
       rasterManager.manifest.forEach(function (e) {
         options += '<option value="' + e.id + '">' + e.title + '</option>';
       });
       div.innerHTML =
-        '<label style="display:block;font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:#5b5749;margin-bottom:.25rem;">Raster overlay</label>' +
-        '<select class="raster-picker__select">' + options + '</select>' +
-        '<button class="raster-picker__clear" type="button" title="Hide overlay">&times;</button>';
+        '<button class="raster-picker__clear" type="button" title="Hide overlay" aria-label="Clear overlay">&times;</button>' +
+        '<label class="raster-picker__label">Raster Overlay</label>' +
+        '<select class="raster-picker__select">' + options + '</select>';
       var sel = div.querySelector(".raster-picker__select");
       var clr = div.querySelector(".raster-picker__clear");
       L.DomEvent.disableClickPropagation(div);

@@ -157,23 +157,28 @@ a { color: var(--teal-dark); }
   background: #cfe3e4;
 }
 #map { position: absolute; inset: 0; }
+
+/* Chart panel lives inline inside each chart step's card, never over a map. */
 .chart-panel {
-  position: absolute;
-  inset: 0;
+  position: relative;
   background: var(--paper-2);
-  padding: 1.6rem 1.8rem 1.2rem;
-  display: flex;
+  padding: 1rem 1.2rem 0.9rem;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  margin: 1.1rem 0 0.2rem;
+  display: none;
   flex-direction: column;
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity 0.5s ease;
-  overflow: auto;
+  overflow: hidden;
 }
-.chart-panel.is-visible { opacity: 1; visibility: visible; }
-.chart-panel h3 { margin: 0 0 0.2rem; font-size: 1.25rem; }
-.chart-panel .sub { margin: 0 0 1rem; font-size: 0.85rem; color: var(--ink-soft); }
-.chart-wrap { position: relative; flex: 1 1 auto; min-height: 0; }
-.chart-source { font-size: 0.72rem; color: #8a8170; margin-top: 0.6rem; }
+.chart-panel.is-visible { display: flex; }
+.chart-panel h3 { margin: 0 0 0.2rem; font-size: 1.05rem; color: var(--ink); }
+.chart-panel .sub { margin: 0 0 0.8rem; font-size: 0.82rem; color: var(--ink-soft); }
+.chart-wrap { position: relative; width: 100%; height: 320px; }
+.chart-source { font-size: 0.72rem; color: #8a8170; margin: 0.55rem 0 0; }
+
+/* The chart slot inside a step card is the docking target for the chart panel */
+.step__chart-slot { display: block; }
+.step__chart-slot:empty { display: none; }
 
 .graphic-badge {
   position: absolute;
@@ -771,7 +776,9 @@ footer .credits { max-width: 760px; margin: 0 auto; }
   align-items: center;
   justify-content: space-between;
   gap: 0.5rem;
-  padding: 0.45rem 0.7rem;
+  /* Leave room on the left for the Leaflet zoom controls so the title
+     does not sit beneath the + and - buttons. */
+  padding: 0.45rem 0.7rem 0.45rem 64px;
   background: linear-gradient(180deg, rgba(15, 36, 43, 0.85) 0%, rgba(15, 36, 43, 0) 100%);
   color: #fff;
   pointer-events: none;
@@ -858,14 +865,26 @@ footer .credits { max-width: 760px; margin: 0 auto; }
 }
 .time-scrubber__collapse:hover { background: #faf6ec; }
 
-/* Time scrubber collapsed: hide body, lose extra padding */
+/* Time scrubber collapsed: shrink to a tiny pill chip in the corner */
 .time-scrubber.is-collapsed {
   width: auto;
-  min-width: 260px;
-  padding: 0.45rem 0.6rem;
+  min-width: 0;
+  padding: 0.35rem 0.55rem;
+  border-radius: 999px;
 }
-.time-scrubber.is-collapsed .time-scrubber__head { margin-bottom: 0; }
-.time-scrubber.is-collapsed .time-scrubber__title { font-size: 0.78rem; }
+.time-scrubber.is-collapsed .time-scrubber__head {
+  margin-bottom: 0;
+  gap: 0.4rem;
+}
+.time-scrubber.is-collapsed .time-scrubber__title {
+  font-size: 0.72rem;
+  font-weight: 600;
+  max-width: 130px;
+}
+.time-scrubber.is-collapsed .time-scrubber__play {
+  width: 22px;
+  height: 22px;
+}
 .time-scrubber__body { display: block; }
 .time-scrubber.is-collapsed .time-scrubber__body { display: none; }
 
@@ -880,15 +899,28 @@ footer .credits { max-width: 760px; margin: 0 auto; }
   border-bottom: 1px solid #ede0c1;
 }
 
-/* Planning panel collapsed: only the title bar remains, ~auto width */
+/* Planning panel collapsed: shrink to a tiny pill chip in the corner */
 .plan-panel.is-collapsed {
   width: auto;
-  min-width: 200px;
+  min-width: 0;
   max-height: none;
+  border-radius: 999px;
+  overflow: visible;
 }
-.plan-panel.is-collapsed .plan-panel__head { border-bottom: none; }
+.plan-panel.is-collapsed .plan-panel__head {
+  border-bottom: none;
+  border-radius: 999px;
+  padding: 0.4rem 0.7rem;
+  font-size: 0.78rem;
+}
+.plan-panel.is-collapsed .plan-panel__head strong { font-size: 0.78rem; font-weight: 600; }
 .plan-panel.is-collapsed .plan-panel__hint,
 .plan-panel.is-collapsed .plan-panel__body { display: none !important; }
+.plan-panel.is-collapsed .plan-panel__collapse {
+  width: 22px;
+  height: 22px;
+  font-size: 13px;
+}
 
 /* Make the right map's planning panel sit a touch tighter and cleaner */
 .map-pane--right .plan-panel { width: 270px; }

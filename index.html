@@ -78,14 +78,6 @@
             <span class="graphic-badge" id="graphic-badge">Map &middot; Barbados</span>
           </div>
           <div id="map"></div>
-
-          <!-- CHART OVERLAY (only over left pane) -->
-          <div class="chart-panel" id="chart-panel">
-            <h3 id="chart-title">Chart</h3>
-            <p class="sub" id="chart-sub"></p>
-            <div class="chart-wrap"><canvas id="chart-canvas"></canvas></div>
-            <p class="chart-source" id="chart-source"></p>
-          </div>
         </div>
 
         <!-- RIGHT PANE: government planning maps comparator -->
@@ -149,6 +141,7 @@
             room adds another 25.5 percent. Penthouses and condominiums command large premiums of
             their own. The market literally pays for separation from the surrounding community.
           </p>
+          <div class="step__chart-slot"></div>
         </div>
       </div>
 
@@ -203,6 +196,7 @@
             <strong>65 percent are sedentary</strong> for three hours or more each day.
           </p>
           <p>Navigating Barbados without a car is hard. Physical immobility becomes social immobility.</p>
+          <div class="step__chart-slot"></div>
         </div>
       </div>
 
@@ -217,6 +211,7 @@
             over the same period stayed essentially flat.
           </p>
           <p>That divergence is the empirical hook tying the built environment to cardiovascular outcomes.</p>
+          <div class="step__chart-slot"></div>
         </div>
       </div>
 
@@ -235,6 +230,7 @@
             consume <strong>70 percent of the national hospital budget</strong>. That is the public
             cost of a privatised landscape.
           </p>
+          <div class="step__chart-slot"></div>
         </div>
       </div>
 
@@ -584,6 +580,16 @@
       </p>
     </div>
   </footer>
+
+  <!-- Portable chart panel. main.js moves it into the active chart step's
+       slot so the chart appears inline with the explanatory text, never over
+       the map. -->
+  <div class="chart-panel" id="chart-panel">
+    <h3 id="chart-title">Chart</h3>
+    <p class="sub" id="chart-sub"></p>
+    <div class="chart-wrap"><canvas id="chart-canvas"></canvas></div>
+    <p class="chart-source" id="chart-source"></p>
+  </div>
 
   <!-- ============ SCRIPTS ============ -->
   <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>

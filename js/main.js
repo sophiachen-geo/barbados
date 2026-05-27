@@ -254,7 +254,6 @@
   function showRasterView(id) {
     var entry = rasterManager.entry(id);
     if (!entry) return;
-    // Use satellite imagery as base so the raster's classes overlay terrain context
     ensureBase(imagery);
     removeIf(corridorLayer);
     removeIf(obsLayer);
@@ -262,9 +261,9 @@
     addIf(parishLayer);
     rasterManager.solo(id);
     setLegend(rasterLegendHTML(entry));
-    // Fit to whatever extent: if WestCoast layer (NDVI 10m / manicuring) tight in, else island
+    // Drive both maps so the linked view stays glued for satellite layer changes too.
     var bounds = L.latLngBounds(entry.bounds);
-    map.flyToBounds(bounds, { duration: 1.0, padding: [10, 10] });
+    flyBoth(bounds, { duration: 1.0, padding: [10, 10] });
   }
 
   // ---------- Satellite raster picker (top-right): single select, GEE only ----------
@@ -581,11 +580,20 @@
     if (parishLayer) parishLayer.setStyle(parishStyleBase);
   }
 
+  // Helper: drive BOTH maps to the same view at the same time. bindSync exists
+  // for ad hoc user pans and zooms, but for view changes we trigger ourselves
+  // we set both maps explicitly so they never drift.
+  function flyBoth(bounds, opts) {
+    opts = opts || { duration: 1.0 };
+    map.flyToBounds(bounds, opts);
+    mapPlan.flyToBounds(bounds, opts);
+  }
+
   var views = {
     overview: function () {
       ensureBase(osm); removeIf(corridorLayer); removeIf(obsLayer);
       resetParishStyle(); addIf(parishLayer); setLegend(null);
-      map.flyToBounds(ISLAND_BOUNDS, { duration: 1.1 });
+      flyBoth(ISLAND_BOUNDS);
     },
     westcoast: function () {
       ensureBase(osm); removeIf(corridorLayer); removeIf(obsLayer);
@@ -593,17 +601,17 @@
         '<h4>Platinum Coast</h4><i style="background:#0e7c86"></i>West parishes (St James, St Peter)' +
         '<br><i style="background:#9bc4c2"></i>Other parishes'
       );
-      map.flyToBounds(WESTCOAST_BOUNDS, { duration: 1.1 });
+      flyBoth(WESTCOAST_BOUNDS);
     },
     landuse: function () {
       ensureBase(imagery); resetParishStyle(); removeIf(parishLayer); removeIf(obsLayer);
-      addIf(corridorLayer); setLegend('<h4>Development corridor</h4><i style="background:#ffd166"></i>Illustrative West-Coast<br>expansion zone (placeholder)');
-      map.flyToBounds(WESTCOAST_BOUNDS, { duration: 1.1 });
+      addIf(corridorLayer); setLegend('<h4>Development Corridor</h4><i style="background:#ffd166"></i>Illustrative West Coast<br>expansion zone (placeholder)');
+      flyBoth(WESTCOAST_BOUNDS);
     },
     publicspace: function () {
       ensureBase(osm); removeIf(corridorLayer); resetParishStyle(); removeIf(parishLayer);
-      addIf(obsLayer); setLegend('<h4>Field encounters</h4>Tap a marker for the full note.<br>Colour = theme of the observation.');
-      map.flyToBounds(WESTCOAST_BOUNDS, { duration: 1.1 });
+      addIf(obsLayer); setLegend('<h4>Field Encounters</h4>Tap a marker for the full note.<br>Colour codes the theme of the observation.');
+      flyBoth(WESTCOAST_BOUNDS);
     },
     edjoin: function () {
       ensureBase(osm); removeIf(corridorLayer); removeIf(obsLayer);
@@ -615,16 +623,16 @@
         });
       }
       setLegend(
-        '<h4>Tourism-pressure index<br><span style="font-weight:400">(illustrative placeholder)</span></h4>' +
+        '<h4>Tourism Pressure Index<br><span style="font-weight:400">(illustrative placeholder)</span></h4>' +
         '<i style="background:#7f0000"></i>High &nbsp;<i style="background:#fc8d59"></i>Mid &nbsp;<i style="background:#fdbb84"></i>Low' +
         '<br><span style="font-size:0.7rem;color:#8a8170">Replace with 2010 census ED join.</span>'
       );
-      map.flyToBounds(ISLAND_BOUNDS, { duration: 1.1 });
+      flyBoth(ISLAND_BOUNDS);
     },
     fieldtimeline: function () {
       ensureBase(osm); removeIf(corridorLayer); resetParishStyle(); removeIf(parishLayer);
-      addIf(obsLayer); setLegend('<h4>March 1–7 field log</h4>13 geocoded observations across the West Coast.');
-      if (obsLayer) map.flyToBounds(obsLayer.getBounds().pad(0.15), { duration: 1.1 });
+      addIf(obsLayer); setLegend('<h4>March 1 to 7 Field Log</h4>13 geocoded observations across the West Coast.');
+      if (obsLayer) flyBoth(obsLayer.getBounds().pad(0.15));
     }
   };
 
@@ -641,7 +649,15 @@
     regression: "Chart · Real estate", cvd: "Chart · Health", riskfactors: "Chart · Health", activity: "Chart · Health"
   };
 
-  function showChart(view) {
+  function showChart(view, stepEl) {
+    // Move the chart panel into the active chart step's slot so it renders
+    // inline with the step's explanatory text. Charts never overlay the map.
+    if (stepEl) {
+      var slot = stepEl.querySelector(".step__chart-slot");
+      if (slot && chartPanel.parentNode !== slot) {
+        slot.appendChild(chartPanel);
+      }
+    }
     chartPanel.classList.add("is-visible");
     badge.textContent = BADGES[view] || "Chart";
     window.requestAnimationFrame(function () {
@@ -676,7 +692,7 @@
     var view = stepEl.getAttribute("data-view");
     if (view === lastView) return;
     lastView = view;
-    if (graphic === "chart") showChart(view);
+    if (graphic === "chart") showChart(view, stepEl);
     else showMap(view);
   }
 

@@ -820,3 +820,76 @@ footer .credits { max-width: 760px; margin: 0 auto; }
   width: 270px;
   max-height: calc(100% - 70px);
 }
+
+/* ---------- TIME SCRUBBER + PLANNING PANEL: shared white look + collapse ---------- */
+.time-scrubber, .plan-panel {
+  background: #ffffff !important;
+  border: 1px solid #e3dccd;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+}
+
+/* Time scrubber: shared header layout */
+.time-scrubber__head {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin-bottom: 0.45rem;
+}
+.time-scrubber__title {
+  flex: 1 1 auto;
+  font-size: 0.85rem;
+  color: #2b2820;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.time-scrubber__collapse {
+  flex-shrink: 0;
+  background: transparent;
+  border: 1px solid #e3dccd;
+  border-radius: 4px;
+  width: 24px;
+  height: 24px;
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+  color: #5b5749;
+}
+.time-scrubber__collapse:hover { background: #faf6ec; }
+
+/* Time scrubber collapsed: hide body, lose extra padding */
+.time-scrubber.is-collapsed {
+  width: auto;
+  min-width: 260px;
+  padding: 0.45rem 0.6rem;
+}
+.time-scrubber.is-collapsed .time-scrubber__head { margin-bottom: 0; }
+.time-scrubber.is-collapsed .time-scrubber__title { font-size: 0.78rem; }
+.time-scrubber__body { display: block; }
+.time-scrubber.is-collapsed .time-scrubber__body { display: none; }
+
+/* Planning panel: white head, neutral hint, cleaner type */
+.plan-panel__head {
+  background: #ffffff !important;
+  border-bottom: 1px solid #ede0c1;
+}
+.plan-panel__hint {
+  background: #ffffff !important;
+  color: #6a6354;
+  border-bottom: 1px solid #ede0c1;
+}
+
+/* Planning panel collapsed: only the title bar remains, ~auto width */
+.plan-panel.is-collapsed {
+  width: auto;
+  min-width: 200px;
+  max-height: none;
+}
+.plan-panel.is-collapsed .plan-panel__head { border-bottom: none; }
+.plan-panel.is-collapsed .plan-panel__hint,
+.plan-panel.is-collapsed .plan-panel__body { display: none !important; }
+
+/* Make the right map's planning panel sit a touch tighter and cleaner */
+.map-pane--right .plan-panel { width: 270px; }
+.map-pane--right .plan-panel.is-collapsed { width: auto; }

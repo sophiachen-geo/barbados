@@ -385,15 +385,17 @@
         });
       });
 
-      // Header collapse
+      // Header collapse: shrink the panel down to just its title bar
       var collapseBtn = div.querySelector(".plan-panel__collapse");
       var body = div.querySelector(".plan-panel__body");
       var hint = div.querySelector(".plan-panel__hint");
       L.DomEvent.on(collapseBtn, "click", function () {
-        var collapsed = body.hidden;
-        body.hidden = !collapsed;
-        hint.hidden = !collapsed;
-        collapseBtn.textContent = collapsed ? "−" : "+";
+        var willCollapse = !body.hidden;
+        body.hidden = willCollapse;
+        hint.hidden = willCollapse;
+        div.classList.toggle("is-collapsed", willCollapse);
+        collapseBtn.innerHTML = willCollapse ? "&plus;" : "&minus;";
+        collapseBtn.setAttribute("aria-label", willCollapse ? "Expand" : "Collapse");
       });
 
       return div;
@@ -422,10 +424,13 @@
       div.innerHTML =
         '<div class="time-scrubber__head">' +
           '<button class="time-scrubber__play" type="button" aria-label="Play">&#9654;</button>' +
-          '<strong>Land Cover Time Series, 1984 to 2025</strong>' +
+          '<strong class="time-scrubber__title">Land Cover Time Series, 1984 to 2025</strong>' +
+          '<button class="time-scrubber__collapse" type="button" aria-label="Collapse">&minus;</button>' +
         '</div>' +
-        '<div class="time-scrubber__ticks">' + tickHtml + '</div>' +
-        '<input type="range" min="0" max="4" step="1" value="0" class="time-scrubber__slider" />';
+        '<div class="time-scrubber__body">' +
+          '<div class="time-scrubber__ticks">' + tickHtml + '</div>' +
+          '<input type="range" min="0" max="4" step="1" value="0" class="time-scrubber__slider" />' +
+        '</div>';
 
       L.DomEvent.disableClickPropagation(div);
       L.DomEvent.disableScrollPropagation(div);
@@ -433,6 +438,15 @@
       var slider = div.querySelector(".time-scrubber__slider");
       var ticks = Array.prototype.slice.call(div.querySelectorAll(".time-scrubber__tick"));
       var playBtn = div.querySelector(".time-scrubber__play");
+      var collapseBtn = div.querySelector(".time-scrubber__collapse");
+      var body = div.querySelector(".time-scrubber__body");
+
+      L.DomEvent.on(collapseBtn, "click", function () {
+        var isCollapsed = div.classList.toggle("is-collapsed");
+        collapseBtn.innerHTML = isCollapsed ? "&plus;" : "&minus;";
+        collapseBtn.setAttribute("aria-label", isCollapsed ? "Expand" : "Collapse");
+        body.hidden = isCollapsed;
+      });
 
       function setEpoch(idx) {
         var spec = EPOCHS[idx];
@@ -732,7 +746,11 @@
     window.setTimeout(function () {
       map.invalidateSize();
       mapPlan.invalidateSize();
-    }, 300);
+      // Force the two viewers to start at the identical view. The initial
+      // fitBounds runs before the panes have their final pixel size, which
+      // can otherwise leave the two maps at slightly different zooms.
+      mapPlan.setView(map.getCenter(), map.getZoom(), { animate: false });
+    }, 350);
   }).catch(function (e) {
     console.error(e);
     document.getElementById("map").innerHTML =

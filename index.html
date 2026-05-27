@@ -67,19 +67,36 @@
 
   <!-- ============ SCROLLYTELLING ============ -->
   <section id="scrolly">
-    <!-- STICKY GRAPHIC -->
+    <!-- STICKY GRAPHIC: two side-by-side map viewers -->
     <div class="scrolly__graphic">
-      <div class="graphic-card">
-        <div class="graphic-badge" id="graphic-badge">Map &middot; Barbados</div>
-        <div id="map"></div>
+      <div class="graphic-card graphic-card--split">
 
-        <!-- CHART OVERLAY -->
-        <div class="chart-panel" id="chart-panel">
-          <h3 id="chart-title">Chart</h3>
-          <p class="sub" id="chart-sub"></p>
-          <div class="chart-wrap"><canvas id="chart-canvas"></canvas></div>
-          <p class="chart-source" id="chart-source"></p>
+        <!-- LEFT PANE: satellite analysis + scrollytelling map -->
+        <div class="map-pane map-pane--left">
+          <div class="map-pane__header">
+            <span class="map-pane__label">Satellite Analysis</span>
+            <span class="graphic-badge" id="graphic-badge">Map &middot; Barbados</span>
+          </div>
+          <div id="map"></div>
+
+          <!-- CHART OVERLAY (only over left pane) -->
+          <div class="chart-panel" id="chart-panel">
+            <h3 id="chart-title">Chart</h3>
+            <p class="sub" id="chart-sub"></p>
+            <div class="chart-wrap"><canvas id="chart-canvas"></canvas></div>
+            <p class="chart-source" id="chart-source"></p>
+          </div>
         </div>
+
+        <!-- RIGHT PANE: government planning maps comparator -->
+        <div class="map-pane map-pane--right">
+          <div class="map-pane__header">
+            <span class="map-pane__label">Government Planning Maps</span>
+            <span class="map-pane__sync" id="sync-badge" title="Pan and zoom stay linked between both maps">Linked View</span>
+          </div>
+          <div id="map-plan"></div>
+        </div>
+
       </div>
     </div>
 

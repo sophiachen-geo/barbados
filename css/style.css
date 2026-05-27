@@ -749,3 +749,84 @@ footer .credits { max-width: 760px; margin: 0 auto; }
   .time-scrubber { width: 88vw; }
   .time-scrubber__ticks { font-size: 0.62rem; }
 }
+
+/* ---------- SPLIT GRAPHIC CARD: two side-by-side map viewers ---------- */
+.graphic-card--split {
+  display: flex;
+  gap: 8px;
+  background: transparent;
+  padding: 0;
+}
+.map-pane {
+  position: relative;
+  flex: 1 1 50%;
+  min-width: 0;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 18px rgba(9, 36, 43, 0.10);
+  background: #cfe3e4;
+}
+.map-pane > #map,
+.map-pane > #map-plan {
+  position: absolute;
+  inset: 0;
+}
+.map-pane__header {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 600;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.45rem 0.7rem;
+  background: linear-gradient(180deg, rgba(15, 36, 43, 0.85) 0%, rgba(15, 36, 43, 0) 100%);
+  color: #fff;
+  pointer-events: none;
+}
+.map-pane__label {
+  font-size: 0.78rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+.map-pane__sync {
+  font-size: 0.66rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  background: rgba(210, 52, 47, 0.85);
+  padding: 0.15rem 0.55rem;
+  border-radius: 12px;
+  font-weight: 700;
+}
+.map-pane .graphic-badge {
+  position: static;
+  background: rgba(9, 36, 43, 0.65);
+  font-size: 0.66rem;
+  padding: 0.2rem 0.55rem;
+  border-radius: 6px;
+}
+.map-pane__right-only { display: none; }
+.map-pane--right .map-pane__right-only { display: block; }
+
+/* Chart panel is constrained to the left pane only */
+.map-pane--left .chart-panel {
+  position: absolute;
+  inset: 0;
+  border-radius: 0;
+  z-index: 700;
+}
+
+/* On narrow screens stack the two maps vertically */
+@media (max-width: 1100px) {
+  .graphic-card--split { flex-direction: column; gap: 6px; }
+  .map-pane { flex: 0 0 50%; min-height: 48vh; }
+}
+
+/* Tighten the planning panel since it now lives on its dedicated map */
+.map-pane--right .plan-panel {
+  width: 270px;
+  max-height: calc(100% - 70px);
+}

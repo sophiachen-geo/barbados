@@ -46,18 +46,39 @@
     "public space / mobility": "#0e7c86"
   };
 
-  // ---------- Map setup ----------
+  // ---------- Map setup (two viewers, linked pan/zoom) ----------
   var map = L.map("map", { zoomControl: true, scrollWheelZoom: true, attributionControl: true })
     .fitBounds(ISLAND_BOUNDS);
+  var mapPlan = L.map("map-plan", { zoomControl: true, scrollWheelZoom: true, attributionControl: true })
+    .fitBounds(ISLAND_BOUNDS);
 
+  // Left-side basemaps
   var osm = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
     maxZoom: 19, attribution: "&copy; OpenStreetMap contributors"
   }).addTo(map);
-
   var imagery = L.tileLayer(
     "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
     { maxZoom: 19, attribution: "Imagery &copy; Esri, Maxar, Earthstar Geographics" }
   );
+
+  // Right-side basemap (light grey, so planning maps read clearly above it)
+  L.tileLayer(
+    "https://{s}.basemaps.cartocdn.com/rastertiles/voyager_nolabels/{z}/{x}/{y}{r}.png",
+    { maxZoom: 19, attribution: "&copy; OpenStreetMap, &copy; CARTO" }
+  ).addTo(mapPlan);
+
+  // Sync pan and zoom between the two maps so panning one moves the other
+  var syncing = false;
+  function bindSync(a, b) {
+    a.on("move zoomanim", function () {
+      if (syncing) return;
+      syncing = true;
+      b.setView(a.getCenter(), a.getZoom(), { animate: false });
+      syncing = false;
+    });
+  }
+  bindSync(map, mapPlan);
+  bindSync(mapPlan, map);
 
   var corridorLayer = L.geoJSON(CORRIDOR, {
     style: { color: "#ffd166", weight: 2, fillColor: "#ffd166", fillOpacity: 0.18, dashArray: "6 5" }
@@ -104,16 +125,18 @@
       }
       return null;
     },
+    _targetMapFor: function (entry) {
+      // Planning maps go on the dedicated right map. Everything else stays
+      // on the main scrollytelling map on the left.
+      return entry.category === "Government Planning Maps" ? mapPlan : map;
+    },
     _ensure: function (id) {
       if (this.layers[id]) return this.layers[id];
       var e = this.entry(id);
       if (!e) return null;
-      // Planning maps are scanned pages with legend chrome, so they look
-      // better at lower opacity over the basemap. GEE rasters are masked to
-      // the island so they can go higher.
       var isPlan = e.category === "Government Planning Maps";
       this.layers[id] = L.imageOverlay(e.png, e.bounds, {
-        opacity: isPlan ? 0.78 : 0.88,
+        opacity: isPlan ? 0.92 : 0.88,
         interactive: false,
         className: isPlan ? "plan-map-overlay" : "v8-raster"
       });
@@ -122,21 +145,30 @@
     show: function (id) {
       var lyr = this._ensure(id);
       if (!lyr) return;
-      if (!map.hasLayer(lyr)) lyr.addTo(map);
-      // Keep parishes / corridor on top
+      var e = this.entry(id);
+      var tgt = this._targetMapFor(e);
+      if (!tgt.hasLayer(lyr)) lyr.addTo(tgt);
       if (parishLayer && map.hasLayer(parishLayer)) parishLayer.bringToFront();
       if (corridorLayer && map.hasLayer(corridorLayer)) corridorLayer.bringToFront();
       this.activeId = id;
     },
     hide: function (id) {
       var lyr = this.layers[id];
-      if (lyr && map.hasLayer(lyr)) map.removeLayer(lyr);
+      if (!lyr) return;
+      if (map.hasLayer(lyr)) map.removeLayer(lyr);
+      if (mapPlan.hasLayer(lyr)) mapPlan.removeLayer(lyr);
       if (this.activeId === id) this.activeId = null;
     },
     solo: function (id) {
+      // Solo only inside the same category so that picking a satellite layer
+      // does not hide the planning maps the user has checked on the other map.
       var self = this;
+      var e = self.entry(id);
+      var cat = e ? e.category : null;
       Object.keys(this.layers).forEach(function (other) {
-        if (other !== id) self.hide(other);
+        if (other === id) return;
+        var oe = self.entry(other);
+        if (oe && oe.category === cat) self.hide(other);
       });
       this.show(id);
     },
@@ -157,7 +189,8 @@
     },
     isActive: function (id) {
       var lyr = this.layers[id];
-      return lyr ? map.hasLayer(lyr) : false;
+      if (!lyr) return false;
+      return map.hasLayer(lyr) || mapPlan.hasLayer(lyr);
     }
   };
 
@@ -365,7 +398,7 @@
 
       return div;
     };
-    ctrl.addTo(map);
+    ctrl.addTo(mapPlan);   // <-- attaches to the dedicated right-side map
   }
 
   // ---------- Time scrubber (bottom-left): drag through 1984 to 2025 ----------
@@ -694,13 +727,19 @@
 
     views.overview();
     initScroller();
-    window.setTimeout(function () { map.invalidateSize(); }, 300);
+    window.setTimeout(function () {
+      map.invalidateSize();
+      mapPlan.invalidateSize();
+    }, 300);
   }).catch(function (e) {
     console.error(e);
     document.getElementById("map").innerHTML =
       '<div style="padding:2rem;font-family:sans-serif;color:#095159">Could not load map data: ' + e.message + "</div>";
   });
 
-  // Keep the map sized correctly on resize.
-  window.addEventListener("resize", function () { map.invalidateSize(); });
+  // Keep both maps sized correctly on resize.
+  window.addEventListener("resize", function () {
+    map.invalidateSize();
+    if (typeof mapPlan !== "undefined") mapPlan.invalidateSize();
+  });
 })();

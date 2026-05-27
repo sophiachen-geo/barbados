@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+code/pipeline/logs/
+code/pipeline/scratch.gdb/
+.DS_Store
+Thumbs.db

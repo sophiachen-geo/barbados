@@ -1,0 +1,12 @@
+system:index,accuracy,kappa,n_test,parish,.geo
+0,0.8409090909090909,0.6909182137481183,176,Christ Church,"{""type"":""MultiPoint"",""coordinates"":[]}"
+1,0.8871595330739299,0.20117899249732002,257,St. Andrew,"{""type"":""MultiPoint"",""coordinates"":[]}"
+2,0.5393700787401575,0.08622480355312616,762,St. George,"{""type"":""MultiPoint"",""coordinates"":[]}"
+3,0.1855123674911661,0.03637693148580377,566,St. James,"{""type"":""MultiPoint"",""coordinates"":[]}"
+4,0.06546854942233633,0.027046455361274924,1558,St. John,"{""type"":""MultiPoint"",""coordinates"":[]}"
+5,0.7910643889618922,0.14214918219909378,761,St. Joseph,"{""type"":""MultiPoint"",""coordinates"":[]}"
+6,0.48674242424242425,0.10736810585218871,528,St. Lucy,"{""type"":""MultiPoint"",""coordinates"":[]}"
+7,0.9148148148148149,0.4137084592145018,540,St. Michael,"{""type"":""MultiPoint"",""coordinates"":[]}"
+8,0.6822429906542056,0.3794985502302575,428,St. Peter,"{""type"":""MultiPoint"",""coordinates"":[]}"
+9,0.8452535760728218,0.5167302147255461,769,St. Phillip,"{""type"":""MultiPoint"",""coordinates"":[]}"
+10,0.6041666666666666,0.4114230396902226,96,St. Tomas,"{""type"":""MultiPoint"",""coordinates"":[]}"

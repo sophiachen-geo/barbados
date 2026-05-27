@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Methods & Code — Barbados Land-Use × Health Project</title>
+  <meta name="description" content="Reproducible methodology and source code: GEE classification scripts, the config-driven arcpy pipeline, and the v8 series integration. Includes the parish-level cross-validation table." />
+
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    main.methods { max-width: 1100px; margin: 0 auto; padding: 4rem 1.5rem 6rem; }
+    main.methods h1 { font-size: clamp(2rem, 4vw, 3.2rem); margin-bottom: .5rem; }
+    main.methods .lede { font-size: 1.1rem; color: #4a4a4a; max-width: 70ch; }
+    main.methods h2 { margin-top: 3rem; font-size: 1.65rem; }
+    main.methods h3 { margin-top: 1.8rem; font-size: 1.2rem; }
+    main.methods pre { background: #0e1620; color: #e8edf3; padding: 1rem 1.25rem; border-radius: 8px; overflow-x: auto; font-size: 0.9rem; line-height: 1.45; }
+    main.methods code:not(pre code) { background: #f1eee8; padding: 0.12em 0.4em; border-radius: 4px; font-size: 0.93em; }
+    .nav-back { display: inline-block; margin-bottom: 2rem; color: #2b6b8a; text-decoration: none; font-weight: 600; }
+    .nav-back:hover { text-decoration: underline; }
+    .warning { border-left: 5px solid #d23a2a; background: #fff5f3; padding: 1.25rem 1.5rem; border-radius: 4px; margin: 2rem 0; }
+    .warning strong { color: #a51d0e; }
+    table.cv { width: 100%; border-collapse: collapse; margin: 1rem 0 2rem; font-size: 0.95rem; }
+    table.cv th, table.cv td { padding: 0.55rem 0.85rem; text-align: right; border-bottom: 1px solid #e6e1d8; }
+    table.cv th { text-align: left; background: #f9f5ec; font-weight: 600; }
+    table.cv td:first-child { text-align: left; font-weight: 500; }
+    .row-fail td { background: #fff0ed; }
+    .row-fail td:first-child { color: #a51d0e; font-weight: 700; }
+    .row-low td { background: #fffcef; }
+    .pipeline-table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.94rem; }
+    .pipeline-table td, .pipeline-table th { padding: 0.5rem 0.8rem; border-bottom: 1px solid #ede7da; vertical-align: top; }
+    .pipeline-table th { text-align: left; background: #f3eee2; }
+    .pipeline-table code { white-space: nowrap; }
+    .file-list { columns: 2; column-gap: 2rem; }
+    .file-list li { break-inside: avoid; }
+    @media (max-width: 720px) { .file-list { columns: 1; } }
+  </style>
+</head>
+<body>
+
+<main class="methods">
+  <a class="nav-back" href="index.html">&larr; Back to the story</a>
+
+  <p class="eyebrow">Methods &middot; Code &middot; Reproducibility</p>
+  <h1>How this analysis works</h1>
+  <p class="lede">
+    Every map, chart, and number on the main page comes from one of three integrated pipelines:
+    a Google Earth Engine classification stack, a config-driven <code>arcpy</code> ArcGIS Pro
+    pipeline, and a curated set of public health datasets. This page walks through each, links
+    to all source code, and surfaces the methodological caveats &mdash; including a serious
+    classifier-failure problem on the West Coast that any reader of the main story should know
+    about.
+  </p>
+
+  <h2>Critical caveat: the classifier fails in St. James and St. John</h2>
+  <div class="warning">
+    <p><strong>The v8c Landsat classifier achieves only 18.6&#37; accuracy and 0.03 kappa in St. James &mdash; the Platinum Coast itself.</strong>
+    St. John performs even worse (6.5&#37; / 0.03). This was discovered by holding out each parish in turn as a test set
+    during cross-validation. The full table is below, and the underlying CSV is
+    <a href="data/remote_sensing/SpatialCV_byParish_v8c.csv">SpatialCV_byParish_v8c.csv</a>.</p>
+    <p>Any per-parish leisuring, urbanisation, or transition rate from the v8c rasters for St. James and St. John
+    should be treated as a <em>lower-bound, indicative estimate</em> rather than a measurement. The 10&#8239;m Sentinel-2
+    classification (<code>Classification_10m_v8f</code>) uses a different sensor and training set; cross-checking
+    against it is the standard mitigation.</p>
+  </div>
+
+  <h3>Spatial cross-validation by parish (v8c, 30&#8239;m Landsat)</h3>
+  <table class="cv">
+    <thead>
+      <tr><th>Parish</th><th>Accuracy</th><th>Kappa</th><th>n_test</th><th>Verdict</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Christ Church</td><td>0.841</td><td>0.691</td><td>176</td><td>Best</td></tr>
+      <tr><td>St. Michael</td><td>0.915</td><td>0.414</td><td>540</td><td>Good</td></tr>
+      <tr><td>St. Phillip</td><td>0.845</td><td>0.517</td><td>769</td><td>Good</td></tr>
+      <tr class="row-low"><td>St. Andrew</td><td>0.887</td><td>0.201</td><td>257</td><td>Accuracy inflated by class imbalance</td></tr>
+      <tr><td>St. Peter</td><td>0.682</td><td>0.379</td><td>428</td><td>Acceptable</td></tr>
+      <tr><td>St. Tomas</td><td>0.604</td><td>0.411</td><td>96</td><td>Small <em>n</em></td></tr>
+      <tr class="row-low"><td>St. Joseph</td><td>0.791</td><td>0.142</td><td>761</td><td>Imbalanced</td></tr>
+      <tr class="row-low"><td>St. George</td><td>0.539</td><td>0.086</td><td>762</td><td>Poor</td></tr>
+      <tr class="row-low"><td>St. Lucy</td><td>0.487</td><td>0.107</td><td>528</td><td>Poor</td></tr>
+      <tr class="row-fail"><td>St. James</td><td>0.186</td><td>0.030</td><td>566</td><td>Classifier fails &mdash; West Coast</td></tr>
+      <tr class="row-fail"><td>St. John</td><td>0.065</td><td>0.030</td><td>1558</td><td>Classifier fails</td></tr>
+    </tbody>
+  </table>
+
+  <h2>The three pipelines</h2>
+
+  <h3>1. Google Earth Engine classification &mdash; <code>code/gee/</code></h3>
+  <p>Five JavaScript files that build Landsat composites and train Random Forest classifiers. Paste each into
+    <a href="https://code.earthengine.google.com/">code.earthengine.google.com</a> and click Run.</p>
+  <table class="pipeline-table">
+    <tr><td><a href="code/gee/01_composite_1984_1986.js"><code>01_composite_1984_1986.js</code></a></td><td>Baseline composite, 1984&ndash;1986 (Landsat 5)</td></tr>
+    <tr><td><a href="code/gee/02_composite_2020.js"><code>02_composite_2020.js</code></a></td><td>Current composite, 2020 (Landsat 7/8)</td></tr>
+    <tr><td><a href="code/gee/03_classify_and_change.js"><code>03_classify_and_change.js</code></a></td><td>Builds both composites, trains Random Forest on 2020 + Copernicus reference, classifies both periods, exports change map</td></tr>
+    <tr><td><a href="code/gee/04_classify_with_challenge_improvements.js"><code>04_classify_with_challenge_improvements.js</code></a></td><td>Same as 03, with 500 trees and 300 samples per class (challenge.html recommendations)</td></tr>
+    <tr><td><a href="code/gee/05_classify_SR_5class.js"><code>05_classify_SR_5class.js</code></a></td><td>Surface-reflectance 5-class variant</td></tr>
+    <tr><td><a href="code/gee/LandTrendr_Walkthrough.md"><code>LandTrendr_Walkthrough.md</code></a></td><td>GUI walkthrough for the LandTrendr time-series module on Barbados</td></tr>
+  </table>
+  <p>The methodology follows the SERVIR-Amazonia
+    <a href="https://servir-amazonia.github.io/barbados-training/landcover-mapping-gee/step-through-1.html">land-cover mapping tutorial</a>
+    verbatim through Steps 1&ndash;2, then extends it with a binary change map and a From-To transition raster.</p>
+
+  <h3>2. ArcGIS Pro pipeline (config-driven <code>arcpy</code>) &mdash; <code>code/pipeline/</code></h3>
+  <p>Twelve phases that automate the entire ArcGIS Pro protocol. Swap a single YAML file
+    (<code>config/barbados.yaml</code> &harr; <code>config/newfoundland.yaml</code>) to re-run the whole
+    thing on a different study area.</p>
+
+  <table class="pipeline-table">
+    <tr><th>Phase</th><th>What it does</th></tr>
+    <tr><td>0</td><td>Inventory &mdash; checks every input file the config references exists</td></tr>
+    <tr><td>1</td><td>Project setup &mdash; folders, <code>.gdb</code>, feature dataset</td></tr>
+    <tr><td>2</td><td>Ingest GEE script-04 outputs &mdash; project rasters, extract NDVI / MNDWI / temp bands</td></tr>
+    <tr><td><strong>2b</strong></td><td><strong>Ingest the v8 series from Google Drive</strong> &mdash; 5 epoch classifications, CCDC, BecameUrban, SugarcaneConversion, ManicuringIndex, NDVI trend, S1 SAR stack, parish CV table</td></tr>
+    <tr><td>3</td><td>Ingest Esri/IO Sentinel-2 annual LC &mdash; build a multidimensional mosaic dataset</td></tr>
+    <tr><td>4</td><td>Ingest vectors &mdash; parishes, roads, coastline, buildings, listings (CSV with lat/lon)</td></tr>
+    <tr><td>5</td><td>Harmonise &mdash; reclassify Esri/IO to Copernicus 8-class, compute 2020 agreement</td></tr>
+    <tr><td>6</td><td>Core analyses &mdash; transition matrix, leisuring rate, coastline change, urban expansion, recent change</td></tr>
+    <tr><td><strong>6b</strong></td><td><strong>v8 analyses</strong> &mdash; 4 consecutive-epoch transitions, BecameUrban / SugarcaneConversion / CCDC break-year / ManicuringIndex / NDVI trend, all by parish; uncertainty mask</td></tr>
+    <tr><td>7</td><td>Listings integration &mdash; extract every raster covariate (incl. v8) onto each 7thHeaven listing; spatial-join admin</td></tr>
+    <tr><td>8</td><td>Spatial statistics &mdash; GLR, Exploratory Regression, GWR, Optimized Hot Spots</td></tr>
+    <tr><td>9</td><td>Layouts &mdash; pre-load every derived layer into a new map in the <code>.aprx</code>; export layout PNGs</td></tr>
+  </table>
+
+  <p>From ArcGIS Pro's Python Command Prompt:</p>
+  <pre>cd code\pipeline
+pip install -r requirements.txt
+python run_pipeline.py --config config/barbados.yaml
+
+# or any subset
+python run_pipeline.py --config config/barbados.yaml --phase 2b
+python run_pipeline.py --config config/barbados.yaml --phases 2-6b
+</pre>
+
+  <p>To re-run on Newfoundland: fill in <code>code/pipeline/config/newfoundland.yaml</code> and swap the
+    <code>--config</code> flag. Zero code changes &mdash; class palette, target CRS, paths,
+    Esri-to-Copernicus remap, regression variables, all live in YAML.</p>
+
+  <h4>Key source files</h4>
+  <ul class="file-list">
+    <li><a href="code/pipeline/run_pipeline.py"><code>run_pipeline.py</code></a> &mdash; CLI orchestrator</li>
+    <li><a href="code/pipeline/config/barbados.yaml"><code>config/barbados.yaml</code></a> &mdash; Barbados region config</li>
+    <li><a href="code/pipeline/config/newfoundland.yaml"><code>config/newfoundland.yaml</code></a> &mdash; NL skeleton</li>
+    <li><a href="code/pipeline/pipeline/arc_utils.py"><code>pipeline/arc_utils.py</code></a> &mdash; shared arcpy helpers</li>
+    <li><a href="code/pipeline/pipeline/phase0_inventory.py"><code>phase0_inventory.py</code></a></li>
+    <li><a href="code/pipeline/pipeline/phase1_setup.py"><code>phase1_setup.py</code></a></li>
+    <li><a href="code/pipeline/pipeline/phase2_ingest_gee.py"><code>phase2_ingest_gee.py</code></a></li>
+    <li><a href="code/pipeline/pipeline/phase2b_ingest_gee_v8.py"><code>phase2b_ingest_gee_v8.py</code></a></li>
+    <li><a href="code/pipeline/pipeline/phase3_ingest_esri_s2.py"><code>phase3_ingest_esri_s2.py</code></a></li>
+    <li><a href="code/pipeline/pipeline/phase4_ingest_vectors.py"><code>phase4_ingest_vectors.py</code></a></li>
+    <li><a href="code/pipeline/pipeline/phase5_harmonize.py"><code>phase5_harmonize.py</code></a></li>
+    <li><a href="code/pipeline/pipeline/phase6_analyses.py"><code>phase6_analyses.py</code></a></li>
+    <li><a href="code/pipeline/pipeline/phase6b_v8_analyses.py"><code>phase6b_v8_analyses.py</code></a></li>
+    <li><a href="code/pipeline/pipeline/phase7_integration.py"><code>phase7_integration.py</code></a></li>
+    <li><a href="code/pipeline/pipeline/phase8_spatial_stats.py"><code>phase8_spatial_stats.py</code></a></li>
+    <li><a href="code/pipeline/pipeline/phase9_layouts.py"><code>phase9_layouts.py</code></a></li>
+    <li><a href="code/pipeline/V8_INTEGRATION_NOTES.md"><code>V8_INTEGRATION_NOTES.md</code></a></li>
+    <li><a href="code/pipeline/README.md"><code>pipeline README</code></a></li>
+  </ul>
+
+  <h3>3. Health data &mdash; <code>data/health/</code> + <code>docs/</code></h3>
+  <p>Curated extraction from three sources, scoped to the project window:</p>
+  <table class="pipeline-table">
+    <tr><td><a href="data/health/barbados_cvd_timeseries_2013_2022.csv"><code>barbados_cvd_timeseries_2013_2022.csv</code></a></td><td>10-year national CVD time series &mdash; AMI &amp; stroke, cases / incidence / mortality, men &amp; women, ASIR + ASMR. From the Barbados National Registry CVD Annual Report 2024.</td></tr>
+    <tr><td><a href="data/health/barbados_ncd_risk_factor_prevalence.csv"><code>barbados_ncd_risk_factor_prevalence.csv</code></a></td><td>Long-format table of HoTNS / GSHS / GYTS / BNR risk-factor prevalence values.</td></tr>
+    <tr><td><a href="data/health/HEALTH_DATA_SYNTHESIS.md"><code>HEALTH_DATA_SYNTHESIS.md</code></a></td><td>Synthesis of all three health sources mapped to the land-use &times; tourism &times; health framing.</td></tr>
+    <tr><td><a href="data/health/census2010_ED_health_columns_guide.md"><code>census2010_ED_health_columns_guide.md</code></a></td><td>Column-by-column guide to the 2010 census ED demographics CSV (disease counts, dwelling-vintage cohorts, tourism-pressure proxies, SES confounders).</td></tr>
+  </table>
+
+  <h2>Design principles</h2>
+  <ul>
+    <li><strong>Idempotent.</strong> Every phase checks if its outputs already exist and skips them. Safe to rerun freely.</li>
+    <li><strong>Config-driven.</strong> Every region-specific value (CRS, paths, class palettes, regression variables) lives in YAML. The code never assumes "Barbados".</li>
+    <li><strong>Failure-tolerant.</strong> Each analysis function is wrapped in <code>try/except</code> so one missing input doesn't abort the rest of the phase.</li>
+    <li><strong>Logged.</strong> Every run writes a timestamped log to <code>code/pipeline/logs/</code>; the parish CV warnings are reproduced in every Phase 2b log.</li>
+    <li><strong>Reproducible end-to-end.</strong> The GEE scripts are reader-pasteable, the pipeline is one-command, the data files are static CSV / GeoTIFF, and the site is a static GitHub Pages deploy.</li>
+  </ul>
+
+  <h2>On causation</h2>
+  <p>This project demonstrates an <em>association and a mechanism</em>, not a proven cause. The land-use &rarr;
+    obesogenic-environment &rarr; cardiovascular-disease pathway is consistent with the WHO Global Syndemic framing
+    (Swinburn et al., <em>Lancet</em> 2019) but confirming it for Barbados specifically requires sub-national
+    CVD incidence and time-varying controls for wealth, age structure, and healthcare access. The pipeline is
+    designed to accept those data when (and if) they become available &mdash; the
+    <a href="docs/HEALTH_DATA_SYNTHESIS.md">health-data synthesis</a> documents exactly what's missing and where to
+    get it.</p>
+
+  <p style="margin-top: 3rem;"><a class="nav-back" href="index.html">&larr; Back to the story</a></p>
+</main>
+
+</body>
+</html>

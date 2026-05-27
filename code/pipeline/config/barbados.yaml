@@ -1,0 +1,296 @@
+# =====================================================================
+# Region config — BARBADOS
+# Every region-specific value the pipeline needs. Swap this file out for
+# config/newfoundland.yaml (or another region) to re-run the whole
+# pipeline on a different study area.
+# =====================================================================
+
+region:
+  name: Barbados
+  # WGS 1984 UTM Zone 21N — appropriate for Barbados
+  target_epsg: 32621
+  # WGS 84 geographic for inputs that arrive as lat/lon
+  geographic_epsg: 4326
+
+paths:
+  # All paths are absolute. Use forward slashes — arcpy accepts them on Windows.
+  project_root: C:/Users/sochen/Documents/ArcGIS/Projects/Barbados
+  inputs_gee: C:/Users/sochen/Documents/ArcGIS/Projects/Barbados/Inputs_GEE
+  inputs_esri_s2: C:/Users/sochen/Documents/ArcGIS/Projects/Barbados/Inputs_Esri_S2
+  inputs_vector: C:/Users/sochen/Documents/ArcGIS/Projects/Barbados/Inputs_Vector
+  derivatives: C:/Users/sochen/Documents/ArcGIS/Projects/Barbados/Derivatives
+  outputs: C:/Users/sochen/Documents/ArcGIS/Projects/Barbados/Outputs
+  logs: C:/Users/sochen/Documents/ArcGIS/Projects/Barbados/Pipeline/logs
+  geodatabase: C:/Users/sochen/Documents/ArcGIS/Projects/Barbados/Barbados.gdb
+  # Phase 2b — v8 GEE series lives on Google Drive (synced via Drive File Stream)
+  inputs_gee_v8: "H:/My Drive/Barbados"
+  health_data: C:/Users/sochen/Documents/ArcGIS/Projects/Barbados/Health_Data
+
+# =====================================================================
+# GEE-derived inputs (script 04 outputs landed in Inputs_GEE/ from Drive)
+# =====================================================================
+gee_inputs:
+  # Multiband composites — bilinear resampling, extract index bands
+  composites:
+    - name: LandsatComposite_1984_1986
+      file: LandsatComposite_1984_1986.tif
+      epoch_label: "1984_86"
+    - name: LandsatComposite_2020
+      file: LandsatComposite_2020.tif
+      epoch_label: "2020"
+
+  # Band order written by GEE script 04
+  composite_band_names:
+    - blue
+    - green
+    - red
+    - nir
+    - swir1
+    - temp
+    - swir2
+    - ndvi
+    - lswi
+    - ndmi
+    - mndwi
+
+  # Which bands to extract as standalone single-band rasters in Phase 2
+  extract_index_bands:
+    - ndvi
+    - mndwi
+    - temp
+
+  # Categorical rasters — nearest resampling
+  categorical:
+    - name: Classified_2020
+      file: Classified_2020_v2.tif
+      kind: classification
+      epoch_label: "2020"
+    - name: Classified_1984_1986
+      file: Classified_1984_1986_v2.tif
+      kind: classification
+      epoch_label: "1984_86"
+    - name: Change_1984_to_2020
+      file: Change_1984_to_2020_v2.tif
+      kind: binary_change
+    - name: FromTo_1984_to_2020
+      file: FromTo_1984_to_2020_v2.tif
+      kind: from_to
+
+# =====================================================================
+# GEE v8 series — richer outputs (5 epoch classifications + CCDC + manicuring
+# index + sugarcane conversion + multi-method consensus). Stored on H: drive.
+# c-suffix = Landsat 30m, f-suffix = Sentinel-2 10m
+# Ingested by phase2b; analyzed by phase6b.
+# =====================================================================
+gee_v8:
+  base_dir_key: inputs_gee_v8   # references paths.inputs_gee_v8
+
+  # 5 epoch classifications (Landsat 30m). All NEAREST resampling, all categorical.
+  epoch_classifications:
+    - name: Classified_1984_92
+      file: Classified_1984_92_v8c.tif
+      epoch_start: 1984
+      epoch_end:   1992
+    - name: Classified_1993_01
+      file: Classified_1993_01_v8c.tif
+      epoch_start: 1993
+      epoch_end:   2001
+    - name: Classified_2002_10
+      file: Classified_2002_10_v8c.tif
+      epoch_start: 2002
+      epoch_end:   2010
+    - name: Classified_2011_18
+      file: Classified_2011_18_v8c.tif
+      epoch_start: 2011
+      epoch_end:   2018
+    - name: Classified_2019_25
+      file: Classified_2019_25_v8c.tif
+      epoch_start: 2019
+      epoch_end:   2025
+
+  # Continuous diagnostics / index rasters (BILINEAR)
+  continuous_30m:
+    - { name: ManicuringIndex_v8c,    file: ManicuringIndex_v8c.tif }
+    - { name: SeasonalAmplitude_v8c,  file: SeasonalAmplitude_v8c.tif }
+    - { name: SeasonalPhase_v8c,      file: SeasonalPhase_v8c.tif }
+    - { name: Certainty_2019_2021_v8c,file: Certainty_2019_2021_v8c.tif }
+    - { name: Disagreement_v8c,       file: Disagreement_v8c.tif }
+    - { name: RF_2019_2021_v8c,       file: RF_2019_2021_v8c.tif }
+
+  # Categorical change rasters (NEAREST)
+  categorical_30m:
+    - { name: BecameUrban_v8c,         file: BecameUrban_v8c.tif,        kind: binary_change }
+    - { name: SugarcaneConversion_v8c, file: SugarcaneConversion_v8c.tif,kind: binary_change }
+    - { name: CCDC_nBreaks_v8c,        file: CCDC_nBreaks_v8c.tif,       kind: counts }
+    - { name: CCDC_FirstBreakYear_v8c, file: CCDC_FirstBreakYear_v8c.tif,kind: years }
+    - { name: Consensus_5way_v8c,      file: Consensus_5way_v8c.tif,     kind: classification }
+    - { name: Trajectory_5bin_v8c,     file: Trajectory_5bin_v8c.tif,    kind: classification }
+
+  # 10m Sentinel-2 / S1 SAR derivatives (v8f). Different resolution -> separate Derivatives prefix.
+  fine_10m:
+    - { name: Classification_10m_v8f,     file: Classification_10m_v8f.tif,     kind: classification,   resampling: NEAREST }
+    - { name: Certainty_10m_v8f,          file: Certainty_10m_v8f.tif,          kind: continuous,       resampling: BILINEAR }
+    - { name: Consensus10m_v8f,           file: Consensus10m_v8f.tif,           kind: classification,   resampling: NEAREST }
+    - { name: ManicuringIndex_10m_v8f,    file: ManicuringIndex_10m_v8f.tif,    kind: continuous,       resampling: BILINEAR }
+    - { name: SeasonalAmplitude_10m_v8f,  file: SeasonalAmplitude_10m_v8f.tif,  kind: continuous,       resampling: BILINEAR }
+    - { name: SeasonalPhase_10m_v8f,      file: SeasonalPhase_10m_v8f.tif,      kind: continuous,       resampling: BILINEAR }
+    - { name: NDVI_Trend_10m_v8f,         file: NDVI_Trend_10m_v8f.tif,         kind: continuous,       resampling: BILINEAR }
+    - { name: S1_SAR_Stack_10m_v8f,       file: S1_SAR_Stack_10m_v8f.tif,       kind: multiband,        resampling: BILINEAR }
+
+  # Per-parish accuracy from spatial CV. Flag parishes where the classifier failed.
+  spatial_cv_csv: SpatialCV_byParish_v8c.csv
+  spatial_cv_unreliable_threshold:
+    accuracy_below: 0.50
+    kappa_below: 0.15
+
+# =====================================================================
+# Phase 6b analyses (specific to v8 series)
+# =====================================================================
+v8_analyses:
+  # Transition matrices between each consecutive epoch pair
+  consecutive_epoch_transitions: true
+
+  # CCDC break-year analysis: histogram by parish, by year-of-detection
+  ccdc_break_year_bins: [1985, 1990, 1995, 2000, 2005, 2010, 2015, 2020, 2025]
+
+  # ManicuringIndex thresholding: pixels above this are flagged as "manicured"
+  # (golf-course / resort lawn / well-irrigated tourism vegetation)
+  manicuring_threshold: 0.5
+
+  # NDVI trend significance threshold (slope per year, after Mann-Kendall test)
+  ndvi_trend_significant_slope: -0.005  # > 0.5% NDVI loss per year = greening down
+
+# =====================================================================
+# Esri / Impact Observatory Sentinel-2 annual Land Cover
+# Drop annual GeoTIFFs in Inputs_Esri_S2/ as Barbados_LC_<YEAR>.tif
+# =====================================================================
+esri_s2:
+  filename_pattern: "Barbados_LC_{year}.tif"
+  years: [2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024]
+  mosaic_name: S2_LC_Mosaic
+  variable_name: Land_Cover
+  dimension_name: Year
+
+# =====================================================================
+# Class schemes
+# Copernicus 8-class is the target schema used everywhere downstream.
+# Esri/IO native scheme is remapped to Copernicus in Phase 5.
+# =====================================================================
+copernicus_8class:
+  palette:
+    1: { name: Agriculture, hex: "#f096ff" }
+    2: { name: Bare,        hex: "#b4b4b4" }
+    3: { name: Herbaceous,  hex: "#ffff4c" }
+    4: { name: Forest,      hex: "#007800" }
+    5: { name: Shrub,       hex: "#ffbb22" }
+    6: { name: Urban,       hex: "#fa0000" }
+    7: { name: Water,       hex: "#0032c8" }
+    8: { name: Wetland,     hex: "#0096a0" }
+
+esri_to_copernicus_remap:
+  # Esri/IO native class -> Copernicus 8-class
+  1: 7   # Water       -> Water
+  2: 4   # Trees       -> Forest
+  4: 8   # Flooded veg -> Wetland
+  5: 1   # Crops       -> Agriculture
+  7: 6   # Built area  -> Urban
+  8: 2   # Bare ground -> Bare
+  11: 3  # Rangeland   -> Herbaceous
+  # 9 (Snow/Ice) and 10 (Clouds) -> NoData (handled in phase5)
+  nodata_classes: [9, 10]
+
+# From-To transition codes (FromTo = early*10 + recent)
+# We highlight the leisuring transitions in the symbology and tables.
+fromto_focus_codes:
+  16: { label: "Ag → Urban",      severity: high }
+  36: { label: "Herb → Urban",    severity: high }
+  46: { label: "Forest → Urban",  severity: high }
+  56: { label: "Shrub → Urban",   severity: high }
+  13: { label: "Ag → Herb",       severity: medium }
+  14: { label: "Ag → Forest",     severity: low }
+  41: { label: "Forest → Ag",     severity: medium }
+
+# =====================================================================
+# Vector inputs — drop the source files in Inputs_Vector/
+# Each entry: where it comes from on disk, and where it lands in the gdb.
+# =====================================================================
+vectors:
+  - name: Parishes
+    source_file: Inputs_Vector/Parishes/barbados_parishes.shp
+    gdb_target: Vector/Parishes
+    role: admin           # used for zonal stats
+    name_field: parish    # field that names each polygon (used in pivots)
+  - name: Roads
+    source_file: Inputs_Vector/Roads/barbados_roads.shp
+    gdb_target: Vector/Roads
+    role: roads
+  - name: Coastline
+    source_file: Inputs_Vector/Coastline/barbados_coastline.shp
+    gdb_target: Vector/Coastline_OSM
+    role: coastline
+  - name: Buildings
+    source_file: Inputs_Vector/Buildings/barbados_buildings.shp
+    gdb_target: Vector/Buildings
+    role: buildings
+  - name: WorldPop_2020
+    source_file: Inputs_Vector/Population/bbr_ppp_2020.tif
+    gdb_target: WorldPop_2020
+    role: population
+    is_raster: true
+  - name: Listings_7thHeaven
+    source_file: Inputs_Vector/Listings/seventh_heaven_listings.csv
+    gdb_target: Vector/Listings_7thHeaven
+    role: listings
+    is_csv_xy: true
+    x_field: longitude
+    y_field: latitude
+    # Columns expected in the CSV for downstream regression
+    attribute_fields: [price, rooms, pool, gated, listing_type]
+  - name: Tourism_POIs
+    source_file: Inputs_Vector/Tourism/tourism_hotels_resorts.shp
+    gdb_target: Vector/Tourism_POIs
+    role: tourism
+    optional: true
+
+# =====================================================================
+# Phase 6 analysis parameters
+# =====================================================================
+analyses:
+  coastline_retreat:
+    mndwi_water_threshold: 0   # > threshold = water
+    smooth_tolerance_meters: 60
+    transect_spacing_meters: 50
+    baseline_offset_meters: 100  # landward of 1985 shoreline
+
+  urban_expansion:
+    urban_class_value: 6
+    distance_to_coast_bin_meters: 100
+
+  esri_recent_change:
+    early_year: 2017
+    recent_year: 2024
+
+# =====================================================================
+# Phase 8 spatial-statistics variables
+# Set these AFTER Phase 7 has joined raster-derived attributes onto
+# Listings_7thHeaven_aug. The names below must match field names in
+# that augmented feature class.
+# =====================================================================
+spatial_stats:
+  enabled: true
+  dependent_variable: price_log
+  explanatory_variables:
+    - rooms
+    - pool
+    - gated
+    - listing_type_code
+    - NDVI_2020
+    - dist_to_coast_m
+    - pct_changed     # joined from Parishes
+  log_transform_dependent: true   # writes price_log from price
+  hotspot_fields:
+    - { feature: Parishes, field: pct_changed }
+    - { feature: Listings_7thHeaven_aug, field: price }
+  gwr:
+    kernel_type: ADAPTIVE
+    bandwidth_method: GOLDEN_SEARCH

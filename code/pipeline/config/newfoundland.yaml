@@ -1,0 +1,187 @@
+# =====================================================================
+# Region config — NEWFOUNDLAND, CANADA
+# Skeleton: fill in TODOs with your NL-specific inputs, then run:
+#   python run_pipeline.py --config config/newfoundland.yaml
+# =====================================================================
+
+region:
+  name: Newfoundland
+  # NAD83(CSRS) / UTM Zone 22N — appropriate for eastern Newfoundland
+  # (Avalon Peninsula, St. John's). Use 26921 (UTM 21N) for the west coast,
+  # or 3761 (NL Lambert) for the whole island.
+  target_epsg: 2961
+  geographic_epsg: 4326
+
+paths:
+  # TODO: set to wherever you set up the NL project on disk
+  project_root: C:/Users/sochen/Documents/ArcGIS/Projects/Newfoundland
+  inputs_gee: C:/Users/sochen/Documents/ArcGIS/Projects/Newfoundland/Inputs_GEE
+  inputs_esri_s2: C:/Users/sochen/Documents/ArcGIS/Projects/Newfoundland/Inputs_Esri_S2
+  inputs_vector: C:/Users/sochen/Documents/ArcGIS/Projects/Newfoundland/Inputs_Vector
+  derivatives: C:/Users/sochen/Documents/ArcGIS/Projects/Newfoundland/Derivatives
+  outputs: C:/Users/sochen/Documents/ArcGIS/Projects/Newfoundland/Outputs
+  logs: C:/Users/sochen/Documents/ArcGIS/Projects/Newfoundland/Pipeline/logs
+  geodatabase: C:/Users/sochen/Documents/ArcGIS/Projects/Newfoundland/Newfoundland.gdb
+
+# =====================================================================
+# GEE inputs — re-run GEE scripts 01-04 with countryName='Canada' and
+# clip to a Newfoundland AOI feature (NL doesn't appear as its own admin
+# unit in FAO GAUL — supply your own AOI as a GEE asset).
+# Then drop the v2 outputs in Inputs_GEE/.
+# =====================================================================
+gee_inputs:
+  composites:
+    - name: LandsatComposite_NL_1984_1986
+      file: LandsatComposite_NL_1984_1986.tif
+      epoch_label: "1984_86"
+    - name: LandsatComposite_NL_2020
+      file: LandsatComposite_NL_2020.tif
+      epoch_label: "2020"
+  composite_band_names:
+    - blue
+    - green
+    - red
+    - nir
+    - swir1
+    - temp
+    - swir2
+    - ndvi
+    - lswi
+    - ndmi
+    - mndwi
+  extract_index_bands:
+    - ndvi
+    - mndwi
+    - temp
+  categorical:
+    - name: Classified_NL_2020
+      file: Classified_NL_2020_v2.tif
+      kind: classification
+      epoch_label: "2020"
+    - name: Classified_NL_1984_1986
+      file: Classified_NL_1984_1986_v2.tif
+      kind: classification
+      epoch_label: "1984_86"
+    - name: Change_NL_1984_to_2020
+      file: Change_NL_1984_to_2020_v2.tif
+      kind: binary_change
+    - name: FromTo_NL_1984_to_2020
+      file: FromTo_NL_1984_to_2020_v2.tif
+      kind: from_to
+
+# =====================================================================
+# Esri / Impact Observatory annual S2 LC (covers Canada from 2017+)
+# =====================================================================
+esri_s2:
+  filename_pattern: "NL_LC_{year}.tif"
+  years: [2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024]
+  mosaic_name: S2_LC_Mosaic
+  variable_name: Land_Cover
+  dimension_name: Year
+
+# =====================================================================
+# Class schemes — same Copernicus 8-class target. For NL you may want
+# to add class 9 = Snow/Ice instead of marking it NoData (Esri/IO
+# class 9 actually means something in NL winters).
+# =====================================================================
+copernicus_8class:
+  palette:
+    1: { name: Agriculture, hex: "#f096ff" }
+    2: { name: Bare,        hex: "#b4b4b4" }
+    3: { name: Herbaceous,  hex: "#ffff4c" }
+    4: { name: Forest,      hex: "#007800" }
+    5: { name: Shrub,       hex: "#ffbb22" }
+    6: { name: Urban,       hex: "#fa0000" }
+    7: { name: Water,       hex: "#0032c8" }
+    8: { name: Wetland,     hex: "#0096a0" }
+
+esri_to_copernicus_remap:
+  1: 7
+  2: 4
+  4: 8
+  5: 1
+  7: 6
+  8: 2
+  11: 3
+  # For NL consider keeping class 9 as Snow (would need a class 9 in
+  # the Copernicus scheme above); the default drops it.
+  nodata_classes: [9, 10]
+
+fromto_focus_codes:
+  46: { label: "Forest → Urban",   severity: high }
+  47: { label: "Forest → Water",   severity: medium }  # hydro reservoir flooding
+  74: { label: "Water → Forest",   severity: low }
+  36: { label: "Herb → Urban",     severity: high }
+  56: { label: "Shrub → Urban",    severity: medium }
+
+# =====================================================================
+# Vectors — NL equivalents
+# TODO replacements:
+#   Parishes -> Census Subdivisions (StatCan) or Economic Regions
+#   Roads    -> Geofabrik North America extract -> NL filter
+#   Coastline -> OSM coastline or StatCan
+#   Population -> StatCan dissemination block 2021 or WorldPop
+#   Listings -> Airbnb (Inside Airbnb), VRBO scrape, etc.
+# =====================================================================
+vectors:
+  - name: Regions
+    source_file: Inputs_Vector/Regions/nl_census_subdivisions.shp
+    gdb_target: Vector/Regions
+    role: admin
+    name_field: CSDNAME
+  - name: Roads
+    source_file: Inputs_Vector/Roads/nl_roads.shp
+    gdb_target: Vector/Roads
+    role: roads
+  - name: Coastline
+    source_file: Inputs_Vector/Coastline/nl_coastline.shp
+    gdb_target: Vector/Coastline_OSM
+    role: coastline
+  - name: Buildings
+    source_file: Inputs_Vector/Buildings/nl_buildings.shp
+    gdb_target: Vector/Buildings
+    role: buildings
+    optional: true
+  - name: Population
+    source_file: Inputs_Vector/Population/can_ppp_2020.tif
+    gdb_target: Population_2020
+    role: population
+    is_raster: true
+  - name: Listings
+    source_file: Inputs_Vector/Listings/nl_short_term_rentals.csv
+    gdb_target: Vector/Listings
+    role: listings
+    is_csv_xy: true
+    x_field: longitude
+    y_field: latitude
+    attribute_fields: [price, rooms, listing_type]
+
+analyses:
+  coastline_retreat:
+    mndwi_water_threshold: 0
+    smooth_tolerance_meters: 60
+    transect_spacing_meters: 100   # NL coast is much longer; coarser default
+    baseline_offset_meters: 200
+  urban_expansion:
+    urban_class_value: 6
+    distance_to_coast_bin_meters: 250
+  esri_recent_change:
+    early_year: 2017
+    recent_year: 2024
+
+spatial_stats:
+  enabled: true
+  dependent_variable: price_log
+  explanatory_variables:
+    - rooms
+    - listing_type_code
+    - NDVI_2020
+    - dist_to_coast_m
+    - pct_changed
+  log_transform_dependent: true
+  hotspot_fields:
+    - { feature: Regions, field: pct_changed }
+    - { feature: Listings_aug, field: price }
+  gwr:
+    kernel_type: ADAPTIVE
+    bandwidth_method: GOLDEN_SEARCH
